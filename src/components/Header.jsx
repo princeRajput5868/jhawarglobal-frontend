@@ -1,0 +1,270 @@
+import React, { useEffect, useMemo, useState } from "react";
+import logo from "../assets/foundation_logo.png";
+import { Link } from "react-router-dom";
+import {
+  Phone,
+  Mail,
+  Menu,
+  X,
+  ChevronDown,
+  Search,
+} from "lucide-react";
+
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaYoutube,
+} from "react-icons/fa";
+
+import { getOrCreateVisitorId } from "../lib/visitor";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const Header = () => {
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [aboutDropdown, setAboutDropdown] = useState(false);
+  const [programDropdown, setProgramDropdown] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+
+  const visitorId = useMemo(() => getOrCreateVisitorId(), []);
+  const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [coursesError, setCoursesError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingCourses(true);
+    fetch(`${API}/api/courses`, {
+      headers: { "x-visitor-id": visitorId },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!isMounted) return;
+        setCourses(Array.isArray(data) ? data : []);
+        setCoursesError(null);
+      })
+      .catch((e) => {
+        if (!isMounted) return;
+        setCoursesError(e?.message || "Failed to load courses");
+        setCourses([]);
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setLoadingCourses(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [visitorId]);
+
+
+  return (
+    <>
+      {/* Top Bar */}
+    <div className="bg-[#C62828] text-white text-sm hidden lg:block">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center py-2">
+            <div className="flex gap-6">
+              <div className="flex items-center gap-2">
+                <Phone size={16} />
+                +91 9876543210
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Mail size={16} />
+                info@jawaharglobalfoundation.org
+              </div>
+            </div>
+
+            <div className="flex gap-4 text-lg">
+              <FaFacebookF className="cursor-pointer hover:text-yellow-400 transition" />
+              <FaInstagram className="cursor-pointer hover:text-yellow-400 transition" />
+              <FaLinkedinIn className="cursor-pointer hover:text-yellow-400 transition" />
+              <FaYoutube className="cursor-pointer hover:text-yellow-400 transition" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navbar */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-md border-b border-red-100">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-24">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3">
+             <img
+  src={logo}
+  alt="Jawahar Global Foundation Logo"
+  className="h-16 w-auto object-contain"
+/>
+
+              <div>
+              <h1 className="font-bold text-xl text-[#C62828]">
+                  Jawahar Global Foundation
+                </h1>
+
+                <p className="text-xs text-gray-500">
+                  Together For A Better Tomorrow
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Menu */}
+            <nav className="hidden lg:flex items-center gap-8 font-medium">
+              <Link to="/" className="hover:text-[#C62828] transition">
+                Home
+              </Link>
+
+             <Link
+  to="/about"
+  className="hover:text-[#C62828] transition"
+>
+  About Us
+</Link>
+
+              {/* Courses */}
+              <div
+                className="relative"
+                onMouseEnter={() => setProgramDropdown(true)}
+                onMouseLeave={() => setProgramDropdown(false)}
+              >
+                <button className="flex items-center gap-1 hover:text-[#C62828] transition">
+                  Courses <ChevronDown size={16} />
+                </button>
+
+                {programDropdown && (
+                  <div className="absolute top-full left-0 bg-white shadow-xl rounded-md w-72 py-2">
+                    <Link
+                      to="/courses"
+                      className="block px-5 py-3 hover:bg-[#FFEBEE] hover:text-[#C62828] font-semibold"
+                    >
+                      All Courses
+                    </Link>
+
+                    <div className="h-px bg-red-100" />
+
+                    {loadingCourses && (
+                      <div className="px-5 py-3 text-sm text-gray-600">Loading...</div>
+                    )}
+
+                    {coursesError && !loadingCourses && (
+                      <div className="px-5 py-3 text-sm text-red-600">{coursesError}</div>
+                    )}
+
+                    {!loadingCourses && !coursesError && courses.length === 0 && (
+                      <div className="px-5 py-3 text-sm text-gray-600">No courses found.</div>
+                    )}
+
+                    {!loadingCourses && !coursesError &&
+                      courses.map((c) => (
+                        <Link
+                          key={c.slug}
+                          to={`/courses/${c.slug}`}
+                          className="block px-5 py-3 hover:bg-[#FFEBEE] hover:text-[#C62828] text-sm"
+                        >
+                          {c.title}
+                        </Link>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+
+
+              <Link to="/blog" className="hover:text-[#C62828] transition">
+                Blog
+              </Link>
+
+              <Link
+                to="/gallery"
+                className="hover:text-[#C62828] transition"
+              >
+                Gallery
+              </Link>
+
+              <Link
+                to="/contact"
+                className="hover:text-[#C62828] transition"
+              >
+                Contact
+              </Link>
+            </nav>
+
+            {/* Right Side */}
+            <div className="hidden lg:flex items-center gap-5">
+              {/* Search */}
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="text-gray-700 hover:text-[#C62828] transition"
+              >
+                <Search size={22} />
+              </button>
+
+              {/* Donate Button */}
+              <Link
+                to="/donate"
+                className="bg-[#C62828] hover:bg-[#8E0000] text-white px-6 py-3 rounded-full font-semibold transition shadow-lg"
+              >
+                Donate Now
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden"
+              onClick={() => setMobileMenu(!mobileMenu)}
+            >
+              {mobileMenu ? <X size={30} /> : <Menu size={30} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Search Box */}
+        {showSearch && (
+          <div className="absolute left-0 top-full w-full bg-white shadow-lg p-5">
+            <div className="container mx-auto">
+              <input
+                type="text"
+                placeholder="Search here..."
+                className="w-full border border-gray-300 px-4 py-3 rounded-lg outline-none focus:border-[#0B4D1E]"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Menu */}
+        {mobileMenu && (
+          <div className="lg:hidden bg-white border-t shadow-md">
+            <div className="flex flex-col p-5 gap-4">
+              <Link to="/">Home</Link>
+              <Link to="/about">About</Link>
+              <Link to="/courses">Courses</Link>
+              <Link to="/blog">Blog</Link>
+              <Link to="/gallery">Gallery</Link>
+              <Link to="/contact">Contact</Link>
+
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="flex items-center gap-2"
+              >
+                <Search size={18} />
+                Search
+              </button>
+
+             <Link
+  to="/donate"
+  className="bg-[#C62828] hover:bg-[#8E0000] text-white text-center py-3 rounded-lg font-semibold transition"
+>
+  Donate Now
+</Link>
+            </div>
+          </div>
+        )}
+      </header>
+    </>
+  );
+};
+
+export default Header;

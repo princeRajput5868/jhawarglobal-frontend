@@ -1,8 +1,49 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams }from "react-router-dom";
 import { getOrCreateVisitorId } from "../lib/visitor";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// ✅ FALLBACK COURSES WITH ALL IMAGES
+const FALLBACK_COURSES = [
+  {
+    id: 1,
+    slug: "mechanic",
+    title: "Mechanic Basics",
+    description: "Hands-on workshop with real vehicle practice and placement assistance.",
+    level: "Beginner Friendly",
+    durationHours: 40,
+    coverImageUrl: "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWVjaGFuaWN8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 2,
+    slug: "electrician",
+    title: "Electrician Fundamentals",
+    description: "Understand electrical safety, basic tools, wiring concepts, and safe troubleshooting approach.",
+    level: "Beginner",
+    durationHours: 8,
+    coverImageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+  },
+  {
+    id: 3,
+    slug: "parlour",
+    title: "Parlour Skills",
+    description: "A structured course on skin/hair care routines, safety, and professional service standards.",
+    level: "Beginner",
+    durationHours: 6,
+    // ✅ PARLOUR IMAGE - CHHOTI KAR DI
+    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=300&h=200&fit=crop&q=80",
+  },
+  {
+    id: 4,
+    slug: "salon",
+    title: "Salon Skills",
+    description: "Styling fundamentals with real client practice.",
+    level: "Beginner Friendly",
+    durationHours: 40,
+    coverImageUrl: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=80",
+  },
+];
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -12,20 +53,39 @@ export default function CourseDetail() {
   const [enrollment, setEnrollment] = useState(null);
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
+    
+    const fallback = FALLBACK_COURSES.find(f => f.slug === slug);
+    if (fallback) {
+      setCourse(fallback);
+    }
+
     fetch(`${API}/api/courses/${slug}`, {
       headers: { "x-visitor-id": visitorId },
     })
       .then(async (r) => {
         if (!r.ok) {
-          const body = await r.json().catch(() => ({}));
-          throw new Error(body.message || "Course not found");
+          throw new Error("Course not found");
         }
         return r.json();
       })
-      .then(setCourse)
-      .catch((e) => setError(e?.message || "Failed to load course"));
+      .then((data) => {
+        setCourse({
+          ...data,
+          coverImageUrl: fallback?.coverImageUrl || data.coverImageUrl,
+          description: data.description || fallback?.description,
+          level: data.level || fallback?.level,
+          durationHours: data.durationHours || fallback?.durationHours,
+        });
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.warn("API failed, using fallback:", e.message);
+        setLoading(false);
+      });
   }, [slug, visitorId]);
 
   const onEnroll = async () => {
@@ -54,11 +114,30 @@ export default function CourseDetail() {
     setEnrollment(data.enrollment || null);
   };
 
-  if (error) {
+  if (loading) {
     return (
       <main className="container mx-auto px-4 py-10">
-        <h1 className="text-2xl font-bold text-[#C62828]">Error</h1>
-        <p className="mt-3 text-gray-600">{error}</p>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-[#F2A93B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-500">Loading course...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error && !course) {
+    return (
+      <main className="container mx-auto px-4 py-10">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="text-6xl mb-4">🔍</div>
+          <h1 className="text-2xl font-bold text-[#C62828]">Course Not Found</h1>
+          <p className="mt-3 text-gray-600">{error}</p>
+          <Link to="/courses" className="mt-6 inline-block bg-[#F2A93B] hover:bg-[#e0993a] text-[#0B2545] px-6 py-3 rounded-lg font-bold text-sm transition-colors">
+            Browse All Courses
+          </Link>
+        </div>
       </main>
     );
   }
@@ -66,7 +145,7 @@ export default function CourseDetail() {
   if (!course) {
     return (
       <main className="container mx-auto px-4 py-10">
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">Course not found</p>
       </main>
     );
   }
@@ -74,14 +153,14 @@ export default function CourseDetail() {
   return (
     <main className="container mx-auto px-4 py-10">
       {/* Hero */}
-      <section className="rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+      <section className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-white">
         <div className="grid md:grid-cols-5">
           <div className="md:col-span-3 p-8">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-[#C62828]">{course.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#0B2545]">{course.title}</h1>
 
             <div className="mt-4 flex flex-wrap gap-2">
               {course.level && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#F2A93B]/10 text-[#0B2545] border border-[#F2A93B]/20">
                   {course.level}
                 </span>
               )}
@@ -101,13 +180,13 @@ export default function CourseDetail() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 to={`/courses/${slug}/learn`}
-                className="inline-flex items-center justify-center px-5 py-3 rounded-md font-bold bg-[#C62828] hover:bg-[#8E0000] text-white transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-bold bg-[#0B2545] hover:bg-[#1a3a6e] text-white transition-colors"
               >
                 Start Learning
               </Link>
               <Link
                 to={`/courses/${slug}/learn`}
-                className="inline-flex items-center justify-center px-5 py-3 rounded-md font-bold border border-gray-200 hover:border-red-700 hover:text-red-700 text-gray-800 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-bold border-2 border-gray-200 hover:border-[#0B2545] hover:text-[#0B2545] text-gray-700 transition-colors"
               >
                 View Syllabus
               </Link>
@@ -120,10 +199,19 @@ export default function CourseDetail() {
                 src={course.coverImageUrl}
                 alt={course.title}
                 className="w-full h-full min-h-[220px] object-cover"
+                onError={(e) => {
+                  const fallback = FALLBACK_COURSES.find(f => f.slug === slug);
+                  if (fallback?.coverImageUrl) {
+                    e.target.src = fallback.coverImageUrl;
+                  }
+                }}
               />
             ) : (
-              <div className="w-full h-full min-h-[220px] flex items-center justify-center text-gray-400">
-                No cover image
+              <div className="w-full h-full min-h-[220px] flex items-center justify-center text-gray-400 bg-gradient-to-br from-[#0B2545]/5 to-[#0B2545]/10">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📚</div>
+                  <span className="text-sm">No cover image</span>
+                </div>
               </div>
             )}
           </div>
@@ -133,7 +221,6 @@ export default function CourseDetail() {
       {/* Content + Sticky Sidebar */}
       <div className="grid lg:grid-cols-3 gap-8 mt-10 items-start">
         <div className="lg:col-span-2">
-          {/* Highlights / What you'll learn placeholder */}
           <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-6">
             <h2 className="text-xl font-extrabold text-gray-900">What you will learn</h2>
             <p className="text-gray-600 mt-2 text-sm leading-relaxed">
@@ -141,8 +228,8 @@ export default function CourseDetail() {
             </p>
 
             <div className="mt-5 grid sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg bg-red-50 border border-red-100">
-                <div className="text-xs font-bold text-red-700 uppercase">Includes</div>
+              <div className="p-4 rounded-lg bg-[#F2A93B]/10 border border-[#F2A93B]/20">
+                <div className="text-xs font-bold text-[#0B2545] uppercase">Includes</div>
                 <div className="text-sm font-extrabold text-gray-900 mt-1">Reading & Steps</div>
               </div>
               <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
@@ -156,7 +243,6 @@ export default function CourseDetail() {
             </div>
           </section>
 
-          {/* Syllabus (modules) placeholder: currently routed to CourseLearn for full syllabus */}
           <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 mt-6">
             <h2 className="text-xl font-extrabold text-gray-900">Syllabus</h2>
             <p className="text-gray-600 mt-2 text-sm leading-relaxed">
@@ -165,13 +251,12 @@ export default function CourseDetail() {
 
             <Link
               to={`/courses/${slug}/learn`}
-              className="mt-4 inline-flex items-center justify-center w-full px-5 py-3 rounded-md font-bold border border-gray-200 hover:border-red-700 hover:text-red-700 text-gray-800 transition-colors"
+              className="mt-4 inline-flex items-center justify-center w-full px-5 py-3 rounded-lg font-bold border-2 border-gray-200 hover:border-[#0B2545] hover:text-[#0B2545] text-gray-700 transition-colors"
             >
               Open Module List
             </Link>
           </section>
 
-          {/* FAQ placeholder */}
           <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 mt-6">
             <h2 className="text-xl font-extrabold text-gray-900">FAQs</h2>
             <div className="mt-4 space-y-3 text-sm">
@@ -200,12 +285,12 @@ export default function CourseDetail() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Enter your full name"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none focus:border-red-700"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-[#0B2545] focus:ring-2 focus:ring-[#0B2545]/20 transition"
             />
 
             <button
               onClick={onEnroll}
-              className="mt-4 w-full bg-[#C62828] hover:bg-[#8E0000] text-white font-bold py-2.5 rounded-md transition-colors"
+              className="mt-4 w-full bg-[#0B2545] hover:bg-[#1a3a6e] text-white font-bold py-2.5 rounded-lg transition-colors"
             >
               Enroll
             </button>
@@ -214,7 +299,7 @@ export default function CourseDetail() {
               {enrollment?.status === "completed" ? (
                 <p className="font-bold text-green-700">Course completed. Your certificate is ready.</p>
               ) : enrollment?.status === "in_progress" ? (
-                <p className="font-bold text-yellow-700">Enrollment saved. Start learning below.</p>
+                <p className="font-bold text-[#F2A93B]">Enrollment saved. Start learning below.</p>
               ) : (
                 <p>Enroll to start modules and generate your certificate after completion.</p>
               )}
@@ -222,7 +307,7 @@ export default function CourseDetail() {
 
             <Link
               to={`/courses/${slug}/learn`}
-              className="inline-block mt-4 w-full text-center border border-gray-200 hover:border-red-700 hover:text-red-700 text-gray-800 font-bold py-2.5 rounded-md transition-colors"
+              className="inline-block mt-4 w-full text-center border-2 border-gray-200 hover:border-[#0B2545] hover:text-[#0B2545] text-gray-700 font-bold py-2.5 rounded-lg transition-colors"
             >
               Go to Course
             </Link>
@@ -236,4 +321,3 @@ export default function CourseDetail() {
     </main>
   );
 }
-

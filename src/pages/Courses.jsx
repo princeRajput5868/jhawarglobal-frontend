@@ -1,61 +1,220 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { getOrCreateVisitorId } from "../lib/visitor";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export default function Courses() {
-  const [courses, setCourses] = useState([]);
-  const [error, setError] = useState(null);
+// ✅ FALLBACK COURSES WITH CORRECT IMAGES
+const FALLBACK_COURSES = [
+  {
+    id: 1,
+    slug: "mechanic",
+    title: "Mechanic Basics",
+    duration: "Service & Diagnostics",
+    level: "Beginner Friendly",
+    features: [
+      "Hands-on Workshop",
+      "Real Vehicle Practice",
+      "Placement Assistance",
+    ],
+    coverImageUrl: "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWVjaGFuaWN8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 2,
+    slug: "electrician",
+    title: "Electrician Fundamentals",
+    duration: "Safety First",
+    level: "Beginner Friendly",
+    features: [
+      "Safety Certification",
+      "Live Wiring Practice",
+      "Placement Assistance",
+    ],
+    coverImageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+  },
+  {
+    id: 3,
+    slug: "parlour",
+    title: "Parlour Skills",
+    duration: "Care & Customer Experience",
+    level: "Beginner Friendly",
+    features: [
+      "Client Handling Practice",
+      "Hygiene & Care Techniques",
+      "Placement Assistance",
+    ],
+    // ✅ NEW IMAGE FOR PARLOUR SKILLS
+    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=500&q=80",
+  },
+  {
+    id: 4,
+    slug: "salon",
+    title: "Salon Skills",
+    duration: "Basics to Employability",
+    level: "Beginner Friendly",
+    features: [
+      "Styling Fundamentals",
+      "Real Client Practice",
+      "Placement Assistance",
+    ],
+    coverImageUrl: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=80",
+  },
+];
 
+export default function Courses() {
+  const location = useLocation();
+  const [courses, setCourses] = useState(FALLBACK_COURSES);
+  const [filteredCourses, setFilteredCourses] = useState(FALLBACK_COURSES);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Get search param from URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get("search") || "";
+    setSearchQuery(query);
+  }, [location.search]);
+
+  // API call but fallback already set
   useEffect(() => {
     const visitorId = getOrCreateVisitorId();
+    
     fetch(`${API}/api/courses`, {
       headers: { "x-visitor-id": visitorId },
     })
       .then((r) => r.json())
-      .then((data) => setCourses(Array.isArray(data) ? data : []))
-      .catch((e) => setError(e?.message || "Failed to load courses"));
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mergedCourses = data.map((course, index) => {
+            const fallback = FALLBACK_COURSES.find(f => f.slug === course.slug) || FALLBACK_COURSES[index % FALLBACK_COURSES.length];
+            return {
+              ...course,
+              coverImageUrl: course.coverImageUrl || fallback?.coverImageUrl,
+              features: course.features || fallback?.features || [],
+              duration: course.duration || fallback?.duration || "",
+            };
+          });
+          setCourses(mergedCourses);
+          setFilteredCourses(mergedCourses);
+        } else {
+          setCourses(FALLBACK_COURSES);
+          setFilteredCourses(FALLBACK_COURSES);
+        }
+      })
+      .catch((e) => {
+        console.error("API Error:", e);
+        setCourses(FALLBACK_COURSES);
+        setFilteredCourses(FALLBACK_COURSES);
+      });
   }, []);
 
+  // Filter courses when search query changes
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredCourses(courses);
+    } else {
+      const filtered = courses.filter((course) =>
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredCourses(filtered);
+    }
+  }, [searchQuery, courses]);
+
   return (
-    <main className="container mx-auto px-4 py-10">
-      <h1 className="text-3xl font-extrabold text-[#C62828] mb-2">Courses</h1>
-      {error && <p className="text-red-600 text-sm mb-6">{error}</p>}
+    <div className="bg-gray-50 py-12 md:py-20 font-inter">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#1a1a2e] mb-4 tracking-tight">
+            {searchQuery ? `Results for "${searchQuery}"` : "Our Courses"}
+          </h1>
+          <p className="text-gray-600 text-base max-w-2xl mx-auto">
+            {searchQuery 
+              ? `${filteredCourses.length} course${filteredCourses.length !== 1 ? 's' : ''} found` 
+              : "Industry-focused training programs designed for career success"}
+          </p>
+        </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {courses.map((c) => (
-          <Link
-            key={c.slug}
-            to={`/courses/${c.slug}`}
-            className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="h-44 overflow-hidden bg-gray-100">
-              {c.coverImageUrl && (
-                <img
-                  src={c.coverImageUrl}
-                  alt={c.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              )}
-            </div>
-            <div className="p-4">
-              <h2 className="font-extrabold text-gray-900 text-sm line-clamp-2">{c.title}</h2>
-              {c.level && (
-                <p className="text-xs text-gray-500 mt-1">Level: {c.level}</p>
-              )}
-              {typeof c.durationHours === "number" && (
-                <p className="text-xs text-gray-500">Duration: {c.durationHours} hours</p>
-              )}
-            </div>
-          </Link>
-        ))}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Course Grid - Home Page Style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          {filteredCourses.map((course) => (
+            <Link
+              key={course.slug || course.id}
+              to={`/courses/${course.slug}`}
+              className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 border border-slate-100 hover:border-[#F2A93B]/30 cursor-pointer"
+            >
+              {/* Image Container */}
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                {course.coverImageUrl ? (
+                  <img
+                    src={course.coverImageUrl}
+                    alt={course.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.src = "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60";
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#0B2545]/5 to-[#0B2545]/10 flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">No Image</span>
+                  </div>
+                )}
+                {/* Duration Badge */}
+                {course.duration && (
+                  <span className="absolute top-3 left-3 bg-[#0B2545]/90 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                    {course.duration}
+                  </span>
+                )}
+                {/* Level Badge */}
+                {course.level && (
+                  <span className="absolute top-3 right-3 bg-[#F2A93B]/90 text-[#0B2545] text-[11px] font-bold px-3 py-1 rounded-full">
+                    {course.level}
+                  </span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-4 md:p-5 flex flex-col">
+                <h3 className="font-sora font-bold text-[#0B2545] text-base leading-snug mb-1">
+                  {course.title}
+                </h3>
+                
+                {/* Features List */}
+                <ul className="space-y-1.5 mb-4 flex-1 mt-2">
+                  {(course.features || []).slice(0, 3).map((f, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
+                      <span className="text-[#F2A93B] font-bold mt-0.5">✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Enroll Button */}
+                <span className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-2.5 px-4 rounded-md transition-colors duration-300 text-center">
+                  Enroll Now
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {filteredCourses.length === 0 && !error && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No courses found for "{searchQuery}"</p>
+            <Link to="/courses" className="text-[#F2A93B] font-semibold hover:underline mt-2 inline-block">
+              Clear search
+            </Link>
+          </div>
+        )}
       </div>
-
-      {courses.length === 0 && !error && (
-        <p className="text-gray-600 mt-8">No courses found.</p>
-      )}
-    </main>
+    </div>
   );
 }
-

@@ -1,271 +1,222 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Phone, Mail, MapPin, Clock, ArrowRight } from "lucide-react";
 import {
   FaFacebookF,
   FaInstagram,
   FaLinkedinIn,
   FaYoutube,
-  FaMapMarkerAlt,
-  FaPhoneAlt,
-  FaEnvelope,
-  FaArrowUp,
+  FaWhatsapp,
 } from "react-icons/fa";
-
 import logo from "../assets/foundation_logo.png";
 
-const Footer = () => {
-  const scrollTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+const quickLinks = [
+  { label: "Home", to: "/" },
+  { label: "About Us", to: "/about" },
+  { label: "All Courses", to: "/courses" },
+  { label: "Blog", to: "/blog" },
+  { label: "Gallery", to: "/gallery" },
+  { label: "Contact Us", to: "/contact" },
+  { label: "Donate", to: "/donate" },
+];
+
+const programs = [
+  { label: "Salon Training", to: "/salon" },
+  { label: "Parlour Skills", to: "/parlour" },
+  { label: "Electrician Trade", to: "/electrician" },
+  { label: "Mechanic Trade", to: "/machanic" },
+  { label: "Verify Diploma", to: "/Diplomas" },
+];
+
+const socials = [
+  { icon: FaFacebookF, href: "https://facebook.com", label: "Facebook" },
+  { icon: FaInstagram, href: "https://instagram.com", label: "Instagram" },
+  { icon: FaLinkedinIn, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: FaYoutube, href: "https://youtube.com", label: "YouTube" },
+];
+
+export default function Footer() {
+  const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#7B1E1E] text-white mt-20">
+    <footer className="relative bg-[#1a0505] text-gray-300">
+      {/* Top accent line */}
+      <div className="h-1 bg-gradient-to-r from-[#7B1C1C] via-[#C62828] to-[#7B1C1C]" />
 
-      {/* Top Section */}
-      <div className="container mx-auto px-6 py-16">
-
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-10">
-
-          {/* Logo */}
+      {/* CTA strip */}
+      <div className="bg-[#C62828]">
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div>
+            <h3 className="text-white text-lg md:text-xl font-extrabold">
+              Ready to build a skilled career?
+            </h3>
+            <p className="text-white/85 text-sm mt-0.5">
+              Enroll today in our vocational training programs — Salon, Parlour, Electrician &amp; Mechanic.
+            </p>
+          </div>
+          <Link
+            to="/courses"
+            className="inline-flex items-center gap-2 bg-white text-[#C62828] font-bold px-6 py-2.5 rounded-full shadow-md hover:bg-gray-100 transition whitespace-nowrap"
+          >
+            Explore Courses <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
 
-            <img
-              src={logo}
-              alt="Jawahar Global Foundation"
-              className="h-20 mb-5"
-            />
+      {/* Main footer content */}
+      <div className="container mx-auto px-4 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Col 1: About */}
+          <div>
+            <Link to="/" className="flex items-center gap-3 mb-4">
+              <div className="bg-white rounded-xl p-1.5 shadow-md">
+                <img
+                  src={logo}
+                  alt="Jawahar Global Foundation Logo"
+                  className="h-12 w-auto object-contain"
+                />
+              </div>
+              <div>
+                <h2 className="text-white font-extrabold text-lg leading-tight">
+                  Jawahar Global Foundation
+                </h2>
+                <p className="text-xs text-gray-400">Together For A Better Tomorrow</p>
+              </div>
+            </Link>
 
-            <p className="text-gray-200 leading-7 mb-5">
-              Jawahar Global Foundation is dedicated to empowering
-              communities through education, healthcare, women
-              empowerment and sustainable development initiatives.
+            <p className="text-sm text-gray-400 leading-relaxed mb-5">
+              Empowering youth with industry-ready vocational skills in Salon, Parlour,
+              Electrician &amp; Mechanic trades — with government-recognized, verifiable
+              certification for every graduate.
             </p>
 
-            <div className="flex gap-4 text-xl">
-
-              <a href="#">
-                <FaFacebookF className="hover:text-yellow-300 duration-300" />
-              </a>
-
-              <a href="#">
-                <FaInstagram className="hover:text-yellow-300 duration-300" />
-              </a>
-
-              <a href="#">
-                <FaLinkedinIn className="hover:text-yellow-300 duration-300" />
-              </a>
-
-              <a href="#">
-                <FaYoutube className="hover:text-yellow-300 duration-300" />
-              </a>
-
+            <div className="flex items-center gap-3">
+              {socials.map(({ icon: Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-[#C62828] hover:scale-110 transition-all duration-200"
+                >
+                  <Icon size={15} />
+                </a>
+              ))}
             </div>
-
           </div>
 
-          {/* Quick Links */}
-
+          {/* Col 2: Quick Links */}
           <div>
-
-            <h3 className="text-2xl font-semibold mb-6">
+            <h3 className="text-white font-bold text-base mb-5 relative inline-block">
               Quick Links
+              <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-[#C62828] rounded-full" />
             </h3>
-
             <ul className="space-y-3">
-
-              <li>
-                <Link to="/" className="hover:text-yellow-300">
-                  Home
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/about" className="hover:text-yellow-300">
-                  About Us
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/gallery" className="hover:text-yellow-300">
-                  Gallery
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/blog" className="hover:text-yellow-300">
-                  Blog
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/contact" className="hover:text-yellow-300">
-                  Contact
-                </Link>
-              </li>
-
+              {quickLinks.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    <ArrowRight
+                      size={13}
+                      className="text-[#C62828] group-hover:translate-x-1 transition-transform"
+                    />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
-
           </div>
 
-          {/* Programs */}
-
+          {/* Col 3: Programs */}
           <div>
-
-            <h3 className="text-2xl font-semibold mb-6">
+            <h3 className="text-white font-bold text-base mb-5 relative inline-block">
               Our Programs
+              <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-[#C62828] rounded-full" />
             </h3>
-
             <ul className="space-y-3">
+              {programs.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    <ArrowRight
+                      size={13}
+                      className="text-[#C62828] group-hover:translate-x-1 transition-transform"
+                    />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-              <li>Education Support</li>
-
-              <li>Healthcare Camps</li>
-
-              <li>Women Empowerment</li>
-
-              <li>Skill Development</li>
-
-              <li>Environment Protection</li>
-
+          {/* Col 4: Contact */}
+          <div>
+            <h3 className="text-white font-bold text-base mb-5 relative inline-block">
+              Contact Us
+              <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-[#C62828] rounded-full" />
+            </h3>
+            <ul className="space-y-4 text-sm text-gray-400">
+              <li className="flex items-start gap-3">
+                <MapPin size={17} className="text-[#C62828] mt-0.5 flex-shrink-0" />
+                <span>Saharanpur, Uttar Pradesh – 247001, India</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone size={17} className="text-[#C62828] flex-shrink-0" />
+                <a href="tel:+919876543210" className="hover:text-white transition-colors">
+                  +91 98765 43210
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail size={17} className="text-[#C62828] flex-shrink-0" />
+                <a
+                  href="mailto:info@jawaharglobalfoundation.org"
+                  className="hover:text-white transition-colors break-all"
+                >
+                  info@jawaharglobalfoundation.org
+                </a>
+              </li>
+              <li className="flex items-start gap-3">
+                <Clock size={17} className="text-[#C62828] mt-0.5 flex-shrink-0" />
+                <span>Mon – Sat: 9:00 AM – 6:00 PM</span>
+              </li>
             </ul>
 
-          </div>
-
-          {/* Contact */}
-
-          <div>
-
-            <h3 className="text-2xl font-semibold mb-6">
-              Contact Us
-            </h3>
-
-            <div className="space-y-5">
-
-              <div className="flex gap-3">
-
-                <FaMapMarkerAlt className="mt-1 text-yellow-300" />
-
-                <p>
-                  New Delhi,
-                  India
-                </p>
-
-              </div>
-
-              <div className="flex gap-3">
-
-                <FaPhoneAlt className="mt-1 text-yellow-300" />
-
-                <p>
-                  +91 9876543210
-                </p>
-
-              </div>
-
-              <div className="flex gap-3">
-
-                <FaEnvelope className="mt-1 text-yellow-300" />
-
-                <p>
-                  info@jawaharglobalfoundation.org
-                </p>
-
-              </div>
-
-            </div>
-
-            <Link
-              to="/donate"
-              className="inline-block mt-8 bg-white text-[#7B1E1E] px-7 py-3 rounded-full font-semibold hover:bg-yellow-300 duration-300"
+            <a
+              href="https://wa.me/919876543210"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
             >
-              Donate Now
-            </Link>
-
+              <FaWhatsapp size={16} /> Chat on WhatsApp
+            </a>
           </div>
-
         </div>
-
       </div>
 
-      {/* Newsletter */}
-
-      <div className="bg-[#651717]">
-
-        <div className="container mx-auto px-6 py-10">
-
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
-
-            <div>
-
-              <h3 className="text-2xl font-bold">
-                Subscribe to our Newsletter
-              </h3>
-
-              <p className="text-gray-200">
-                Stay updated with our latest initiatives and events.
-              </p>
-
-            </div>
-
-            <div className="flex w-full lg:w-auto">
-
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="px-5 py-3 rounded-l-lg w-full lg:w-80 text-black outline-none"
-              />
-
-              <button className="bg-yellow-400 text-black px-6 rounded-r-lg font-semibold hover:bg-yellow-300">
-                Subscribe
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Bottom */}
-
-      <div className="border-t border-red-800">
-
-        <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-5">
-
-          <p className="text-gray-300 text-center">
-            © {new Date().getFullYear()} Jawahar Global Foundation.
-            All Rights Reserved.
-          </p>
-
-          <div className="flex gap-6">
-
-            <Link to="/privacy" className="hover:text-yellow-300">
+      {/* Bottom bar */}
+      <div className="border-t border-white/10">
+        <div className="container mx-auto px-4 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+          <p>© {year} Jawahar Global Foundation. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
-
-            <Link to="/terms" className="hover:text-yellow-300">
-              Terms & Conditions
+            <span className="text-gray-700">|</span>
+            <Link to="/terms-conditions" className="hover:text-white transition-colors">
+              Terms &amp; Conditions
             </Link>
-
+            <span className="text-gray-700">|</span>
+            <Link to="/Diplomas" className="hover:text-white transition-colors">
+              Verify Diploma
+            </Link>
           </div>
-
-          <button
-            onClick={scrollTop}
-            className="bg-yellow-400 text-black p-3 rounded-full hover:bg-yellow-300 duration-300"
-          >
-            <FaArrowUp />
-          </button>
-
         </div>
-
       </div>
-
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -5,7 +5,8 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { 
   Award, BookOpen, Star, Users, TrendingUp, Calendar, 
   ChevronRight, FileText, Settings, BarChart3, 
-  Clock, CheckCircle, XCircle, ExternalLink 
+  Clock, CheckCircle, XCircle, ExternalLink, PlusCircle,
+  MessageSquare, UserCheck
 } from "lucide-react";
 
 function StatCard({ label, value, icon, accent, subtitle }) {
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
     },
   ];
 
+  // ✅ Quick Actions - Placements & Testimonials ADDED
   const quickActions = [
     {
       title: "Manage Certificates",
@@ -151,18 +153,39 @@ export default function AdminDashboard() {
       color: "#7B1C1C",
     },
     {
-      title: "Course Modules",
-      description: "Create, update or delete course modules",
-      icon: <Settings className="w-6 h-6" />,
+      title: "Manage Courses",
+      description: "Create, edit, delete and manage all training programs",
+      icon: <BookOpen className="w-6 h-6" />,
       link: "/admin/courses",
       color: "#B8860B",
     },
     {
-      title: "Analytics",
-      description: "View course performance and student engagement",
-      icon: <BarChart3 className="w-6 h-6" />,
-      link: "/admin/analytics",
+      title: "Manage Placements",
+      description: "Add, edit and manage student success stories",
+      icon: <UserCheck className="w-6 h-6" />,
+      link: "/admin/placements",
+      color: "#10B981",
+    },
+    {
+      title: "Manage Testimonials",
+      description: "Add, edit and manage student feedback",
+      icon: <MessageSquare className="w-6 h-6" />,
+      link: "/admin/testimonials",
+      color: "#8B5CF6",
+    },
+    {
+      title: "Course Modules",
+      description: "Create, update or delete course modules",
+      icon: <Settings className="w-6 h-6" />,
+      link: "/admin/courses",
       color: "#2563EB",
+    },
+    {
+      title: "Add New Course",
+      description: "Create a new training program from scratch",
+      icon: <PlusCircle className="w-6 h-6" />,
+      link: "/admin/courses/new",
+      color: "#F59E0B",
     },
   ];
 
@@ -195,27 +218,28 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Quick Actions & Recent Activity */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        <div>
-          <h2 className="font-sora font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[#7B1C1C]" />
-            Quick Actions
-          </h2>
-          <div className="space-y-4">
-            {quickActions.map((action, index) => (
-              <QuickAction
-                key={index}
-                title={action.title}
-                description={action.description}
-                icon={action.icon}
-                link={action.link}
-                color={action.color}
-              />
-            ))}
-          </div>
+      {/* Quick Actions */}
+      <div className="mb-8">
+        <h2 className="font-sora font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-[#7B1C1C]" />
+          Quick Actions
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {quickActions.map((action, index) => (
+            <QuickAction
+              key={index}
+              title={action.title}
+              description={action.description}
+              icon={action.icon}
+              link={action.link}
+              color={action.color}
+            />
+          ))}
         </div>
+      </div>
 
+      {/* Recent Activity */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-8">
         <div>
           <h2 className="font-sora font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5 text-[#7B1C1C]" />
@@ -237,6 +261,40 @@ export default function AdminDashboard() {
                 <p className="text-gray-400 text-xs">New certificates will appear here</p>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div>
+          <h2 className="font-sora font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-[#7B1C1C]" />
+            Quick Stats
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-sora font-extrabold text-[#7B1C1C]">
+                {stats ? stats.totalcertificates : "—"}
+              </div>
+              <div className="text-xs text-gray-500">Total Certificates</div>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-sora font-extrabold text-[#B8860B]">
+                {stats ? stats.totalCourses : "—"}
+              </div>
+              <div className="text-xs text-gray-500">Total Courses</div>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-sora font-extrabold text-[#2563EB]">
+                {stats ? stats.distinctCoursesWithcertificates : "—"}
+              </div>
+              <div className="text-xs text-gray-500">Active Programs</div>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-sora font-extrabold text-[#10B981]">
+                {courses.filter(c => c.isActive).length}
+              </div>
+              <div className="text-xs text-gray-500">Active Courses</div>
+            </div>
           </div>
         </div>
       </div>
@@ -289,7 +347,9 @@ export default function AdminDashboard() {
                     <div className="text-gray-500">
                       <BookOpen className="w-8 h-8 mx-auto mb-3 text-gray-300" />
                       <p>No courses found</p>
-                      <p className="text-xs text-gray-400 mt-1">Create your first course to get started</p>
+                      <Link to="/admin/courses/new" className="text-[#7B1C1C] font-semibold text-sm hover:underline mt-2 inline-block">
+                        Create your first course →
+                      </Link>
                     </div>
                   </td>
                 </tr>
@@ -316,47 +376,27 @@ export default function AdminDashboard() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Link
-                        to={`/admin/courses/${c.slug}/modules`}
-                        className="inline-flex items-center gap-1.5 text-[#7B1C1C] font-semibold text-xs hover:underline transition-colors"
-                      >
-                        <Settings className="w-3.5 h-3.5" />
-                        Manage Modules
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/admin/courses/${c.slug}/edit`}
+                          className="text-blue-600 font-semibold text-xs hover:underline"
+                        >
+                          Edit
+                        </Link>
+                        <span className="text-gray-300">|</span>
+                        <Link
+                          to={`/admin/courses/${c.slug}/modules`}
+                          className="text-[#7B1C1C] font-semibold text-xs hover:underline"
+                        >
+                          Modules
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Footer Stats */}
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
-          <div className="text-[#7B1C1C] font-sora font-extrabold text-xl">
-            {stats ? stats.totalcertificates : "—"}
-          </div>
-          <div className="text-xs text-gray-500">Total Certificates</div>
-        </div>
-        <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
-          <div className="text-[#B8860B] font-sora font-extrabold text-xl">
-            {stats ? stats.totalCourses : "—"}
-          </div>
-          <div className="text-xs text-gray-500">Total Courses</div>
-        </div>
-        <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
-          <div className="text-[#2563EB] font-sora font-extrabold text-xl">
-            {stats ? stats.distinctCoursesWithcertificates : "—"}
-          </div>
-          <div className="text-xs text-gray-500">Active Programs</div>
-        </div>
-        <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
-          <div className="text-[#7B1C1C] font-sora font-extrabold text-xl">
-            {stats?.recent?.length || 0}
-          </div>
-          <div className="text-xs text-gray-500">Recent Certificates</div>
         </div>
       </div>
     </AdminLayout>

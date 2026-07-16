@@ -11,7 +11,6 @@ export function setAdminToken(token) {
   else localStorage.removeItem("admin_token");
 }
 
-// Turns a relative "/uploads/..." path returned by the backend into a full URL
 export function resolveMediaUrl(url) {
   if (!url) return "";
   if (/^https?:\/\//i.test(url)) return url;

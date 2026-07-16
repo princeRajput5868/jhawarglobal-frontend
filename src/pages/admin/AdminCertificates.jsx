@@ -7,7 +7,7 @@ import {
   Calendar, BookOpen, Award, FileText, ChevronLeft, 
   ChevronRight, X, Loader2, CheckCircle, AlertCircle,
   UserPlus, GraduationCap, Building, Phone, MapPin,
-  RefreshCw, Filter, Download
+  RefreshCw, Filter, Download, Edit
 } from "lucide-react";
 
 export default function AdminCertificates() {
@@ -260,7 +260,7 @@ export default function AdminCertificates() {
         </span>
       }
     >
-      {/* Create Certificate Section - Professional */}
+      {/* Create Certificate Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
@@ -297,6 +297,7 @@ export default function AdminCertificates() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {/* Form fields - same as before */}
             <div>
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
                 <User className="w-3.5 h-3.5" />
@@ -660,7 +661,7 @@ export default function AdminCertificates() {
         </div>
       )}
 
-      {/* Search Filters - Professional */}
+      {/* Search Filters */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div className="p-5">
           <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -747,7 +748,7 @@ export default function AdminCertificates() {
         </div>
       </div>
 
-      {/* Certificates Table - Professional */}
+      {/* Certificates Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -821,6 +822,15 @@ export default function AdminCertificates() {
                       <td className="p-4 text-gray-500 text-xs">{c.issuedAt ? new Date(c.issuedAt).toLocaleDateString() : "-"}</td>
                       <td className="p-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
+                          {/* ✅ EDIT BUTTON - AB YAHAN HAI */}
+                          <Link
+                            to={`/admin/certificates/${c.id}/edit`}
+                            className="inline-flex items-center gap-1.5 text-blue-600 font-semibold text-xs hover:underline transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                            Edit
+                          </Link>
+                          <span className="text-gray-300">|</span>
                           <Link
                             to={`/admin/certificates/${c.id}/preview`}
                             target="_blank"

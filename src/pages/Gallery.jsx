@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getOrCreateVisitorId } from "../lib/visitor";
+import { 
+  Award, Users, BookOpen, Clock, CheckCircle, 
+  ArrowRight, Star, Briefcase, GraduationCap,
+  Sparkles, TrendingUp, MapPin, Phone, Mail,
+  Shield, Heart, ExternalLink, Play, Image
+} from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-// ✅ FALLBACK COURSES WITH UNIQUE IMAGES
+// ✅ HOME PAGE SE EXACT IMAGES (SAME AS ABOUT PAGE)
 const FALLBACK_COURSES = [
   {
     id: 1,
@@ -30,8 +36,7 @@ const FALLBACK_COURSES = [
       "Live Wiring Practice",
       "Placement Assistance",
     ],
-    // ✅ ELECTRICIAN - NAYI IMAGE
-    coverImageUrl: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=300&h=200&fit=crop&q=80",
+    coverImageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
   },
   {
     id: 3,
@@ -44,8 +49,7 @@ const FALLBACK_COURSES = [
       "Hygiene & Care Techniques",
       "Placement Assistance",
     ],
-    // ✅ PARLOUR - NAYI IMAGE
-    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=300&h=200&fit=crop&q=80",
+    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=500&q=80",
   },
   {
     id: 4,
@@ -71,15 +75,18 @@ const GalleryStats = () => {
   ];
 
   return (
-    <section className="py-12 md:py-16 bg-[#0B2545]">
-      <div className="container mx-auto px-4">
+    <section className="py-12 md:py-16 bg-[#0B2545] relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(242,169,59,0.05),_transparent_70%)]" />
+      <div className="container mx-auto px-4 relative">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center text-white">
-              <div className="text-2xl md:text-4xl font-sora font-extrabold text-[#F2A93B]">
+            <div key={index} className="text-center group">
+              <div className="text-2xl md:text-4xl font-sora font-extrabold text-[#F2A93B] group-hover:scale-110 transition-transform duration-300">
                 {stat.number}
               </div>
-              <div className="text-xs md:text-sm text-slate-300 mt-1">{stat.label}</div>
+              <div className="text-xs md:text-sm text-slate-300 mt-1 group-hover:text-white transition-colors duration-300">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
@@ -120,10 +127,14 @@ const FeaturedGallery = () => {
     <section className="py-12 md:py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10 md:mb-14">
+          <span className="inline-block bg-[#F2A93B]/10 text-[#F2A93B] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
+            Gallery
+          </span>
           <h2 className="text-2xl md:text-3xl font-sora font-extrabold text-[#0B2545]">
             Our Training Gallery
           </h2>
-          <p className="text-gray-500 text-sm md:text-base mt-2">
+          <div className="w-16 h-1 bg-[#F2A93B] rounded-full mx-auto mt-4" />
+          <p className="text-gray-500 text-sm md:text-base mt-4 max-w-2xl mx-auto">
             Glimpses of our hands-on training sessions and workshops
           </p>
         </div>
@@ -159,24 +170,24 @@ const TestimonialGallery = () => {
   const testimonials = [
     {
       id: 1,
-      name: "Ritika Sharma",
-      role: "Web Developer",
-      message: "The hands-on training changed my career completely. I got placed within a month!",
+      name: "Priya Sharma",
+      role: "Salon Expert",
+      message: "The hands-on training at Jawahar Global Foundation changed my life. Within 2 months of completing my Salon course, I got placed at Lakmé.",
       image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
     },
     {
       id: 2,
-      name: "Suresh Kumar",
-      role: "Electrical Technician",
-      message: "Practical sessions and expert guidance made all the difference. Highly recommended!",
+      name: "Vikram Singh",
+      role: "Mechanic Engineer",
+      message: "I was skeptical about vocational training at first, but the Mechanic course at JGF is world-class. Now I'm working at Maruti Suzuki.",
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
     },
     {
       id: 3,
-      name: "Priya Singh",
-      role: "Accounts Executive",
-      message: "Flexible timings and placement support helped me start my career smoothly.",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+      name: "Sneha Patel",
+      role: "Parlour Artist",
+      message: "The Parlour Skills course was incredibly detailed. The trainers were supportive and the placement team found me a great opportunity at VLCC.",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
     },
   ];
 
@@ -184,10 +195,14 @@ const TestimonialGallery = () => {
     <section className="py-12 md:py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10 md:mb-14">
+          <span className="inline-block bg-[#F2A93B]/10 text-[#F2A93B] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
+            Testimonials
+          </span>
           <h2 className="text-2xl md:text-3xl font-sora font-extrabold text-[#0B2545]">
             Student Success Stories
           </h2>
-          <p className="text-gray-500 text-sm md:text-base mt-2">
+          <div className="w-16 h-1 bg-[#F2A93B] rounded-full mx-auto mt-4" />
+          <p className="text-gray-500 text-sm md:text-base mt-4 max-w-2xl mx-auto">
             Hear from our graduates who transformed their lives
           </p>
         </div>
@@ -205,7 +220,7 @@ const TestimonialGallery = () => {
               />
               <p className="text-gray-600 text-sm md:text-base italic mb-4">"{t.message}"</p>
               <h4 className="font-bold text-[#0B2545] text-sm md:text-base">{t.name}</h4>
-              <p className="text-gray-400 text-xs md:text-sm">{t.role}</p>
+              <p className="text-[#F2A93B] text-xs font-semibold">{t.role}</p>
             </div>
           ))}
         </div>
@@ -216,8 +231,12 @@ const TestimonialGallery = () => {
 
 const CTASection = () => {
   return (
-    <section className="py-12 md:py-16 bg-[#F2A93B]">
-      <div className="container mx-auto px-4 text-center">
+    <section className="py-12 md:py-16 bg-[#F2A93B] relative overflow-hidden">
+      <div className="absolute inset-0">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#0B2545]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B2545]/5 rounded-full blur-3xl" />
+      </div>
+      <div className="container mx-auto px-4 text-center relative">
         <h2 className="text-2xl md:text-3xl font-sora font-extrabold text-[#0B2545] mb-3">
           Ready to Start Your Journey?
         </h2>
@@ -226,9 +245,10 @@ const CTASection = () => {
         </p>
         <Link
           to="/courses"
-          className="inline-block bg-[#0B2545] hover:bg-[#1a3a6e] text-white font-bold py-3 px-8 rounded-md transition-colors shadow-lg hover:shadow-xl"
+          className="inline-block bg-[#0B2545] hover:bg-[#1a3a6e] text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg hover:shadow-[#0B2545]/30 group"
         >
           Explore Courses
+          <ArrowRight className="w-4 h-4 inline-block ml-2 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </section>
@@ -289,26 +309,40 @@ export default function Gallery() {
       <section className="relative bg-[#0B2545] py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(242,169,59,0.15),_transparent_55%)]" />
         <div className="container mx-auto px-4 text-center relative">
+          <div className="inline-flex items-center gap-2 bg-[#F2A93B]/10 border border-[#F2A93B]/20 rounded-full px-4 py-1.5 mb-4">
+            <span className="w-2 h-2 bg-[#F2A93B] rounded-full animate-pulse" />
+            <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-wider">
+              Gallery
+            </span>
+          </div>
           <h1 className="text-3xl md:text-5xl font-sora font-extrabold text-white mb-4">
             Course Gallery
           </h1>
           <p className="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
             Explore our vocational training programs with hands-on learning and expert mentorship
           </p>
+          <div className="w-20 h-1 bg-[#F2A93B] rounded-full mx-auto mt-6" />
         </div>
       </section>
 
+      {/* Stats Section */}
       <GalleryStats />
+
+      {/* Featured Gallery Images */}
       <FeaturedGallery />
 
-      {/* Courses Grid Section */}
+      {/* Courses Grid Section - SAME AS ABOUT PAGE */}
       <section className="py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10 md:mb-14">
+            <span className="inline-block bg-[#F2A93B]/10 text-[#F2A93B] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
+              Programs
+            </span>
             <h2 className="text-2xl md:text-3xl font-sora font-extrabold text-[#0B2545]">
               Our Training Programs
             </h2>
-            <p className="text-gray-500 text-sm md:text-base mt-2">
+            <div className="w-16 h-1 bg-[#F2A93B] rounded-full mx-auto mt-4" />
+            <p className="text-gray-500 text-sm md:text-base mt-4 max-w-2xl mx-auto">
               Click on any course to learn more and enroll
             </p>
           </div>
@@ -317,59 +351,55 @@ export default function Gallery() {
             <p className="text-red-600 text-sm text-center mb-6">{error}</p>
           )}
 
+          {/* ✅ SAME AS ABOUT PAGE COURSES GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
             {courses.map((c) => (
-              <div
-                key={c.id || c.slug}
-                role="button"
-                tabIndex={0}
-                onClick={() => window.location.href = `/courses/${c.slug}`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    window.location.href = `/courses/${c.slug}`;
-                  }
-                }}
-                className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow flex flex-col cursor-pointer border border-slate-200"
+              <Link
+                key={c.slug}
+                to={`/courses/${c.slug}`}
+                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-[#F2A93B]/30 hover:-translate-y-2"
               >
-                <div className="h-40 overflow-hidden relative">
+                <div className="h-52 overflow-hidden relative">
                   <img
                     src={c.coverImageUrl}
                     alt={c.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => {
                       e.target.src = "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60";
                     }}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                   {c.duration && (
-                    <span className="absolute top-3 left-3 bg-[#0B2545]/90 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                    <span className="absolute top-4 left-4 bg-[#0B2545]/90 backdrop-blur-sm text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/10">
                       {c.duration}
+                    </span>
+                  )}
+                  {c.level && (
+                    <span className="absolute top-4 right-4 bg-[#F2A93B]/90 backdrop-blur-sm text-[#0B2545] text-[11px] font-bold px-3 py-1.5 rounded-full">
+                      {c.level}
                     </span>
                   )}
                 </div>
 
                 <div className="p-4 md:p-5 flex flex-col flex-1">
-                  <h3 className="font-sora font-bold text-[#0B2545] text-base leading-snug mb-1 md:mb-2">
+                  <h3 className="font-sora font-bold text-[#0B2545] text-base leading-snug mb-1 line-clamp-1">
                     {c.title}
                   </h3>
-                  {c.level && <p className="text-slate-400 text-xs mb-3">{c.level}</p>}
                   
-                  <ul className="space-y-1.5 mb-5 flex-1">
+                  <ul className="space-y-1.5 mt-2 mb-4 flex-1">
                     {(c.features || []).slice(0, 3).map((f, i) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
                         <span className="text-[#F2A93B] font-bold mt-0.5">✓</span>
-                        {f}
+                        <span className="line-clamp-1">{f}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <Link
-                    to={`/courses/${c.slug}`}
-                    className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-2.5 rounded-md transition-colors"
-                  >
+                  <span className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-2.5 rounded-md transition-colors duration-300 text-center">
                     Enroll Now
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -379,8 +409,29 @@ export default function Gallery() {
         </div>
       </section>
 
+      {/* Testimonials */}
       <TestimonialGallery />
+
+      {/* CTA Section */}
       <CTASection />
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
     </main>
   );
 }

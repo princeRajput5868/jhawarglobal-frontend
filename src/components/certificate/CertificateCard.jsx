@@ -417,7 +417,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                 Skill Development &amp; Vocational Training Institute
               </p>
               <p style={{ fontSize: 11.5, color: "#14306b", fontStyle: "italic", fontWeight: 600, lineHeight: 1.5 }}>
-                Reg. Office: New Delhi, Uttar Pradesh &nbsp;|&nbsp; Email: info@jawaharglobalfoundation.org &nbsp;|&nbsp; Contact: +91 98765 43210
+                Reg. Office: TUGHLKABAD EXTENSION NEW DELHI 110019 &nbsp;|&nbsp; Email: info@jawaharglobalfoundation.org &nbsp;|&nbsp; Contact: +91 98765 43210
               </p>
             </div>
 

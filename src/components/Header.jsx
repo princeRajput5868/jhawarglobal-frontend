@@ -204,10 +204,10 @@ const Header = () => {
                   </div>
                 )}
               </div>
-
+{/* 
               <Link to="/blog" className="hover:text-[#C62828] transition">
                 Blog
-              </Link>
+              </Link> */}
 
               <Link to="/gallery" className="hover:text-[#C62828] transition">
                 Gallery
@@ -333,7 +333,7 @@ const Header = () => {
               <Link to="/">Home</Link>
               <Link to="/about">About</Link>
               <Link to="/courses">Courses</Link>
-              <Link to="/blog">Blog</Link>
+              {/* <Link to="/blog">Blog</Link> */}
               <Link to="/gallery">Gallery</Link>
               <Link to="/contact">Contact</Link>
 

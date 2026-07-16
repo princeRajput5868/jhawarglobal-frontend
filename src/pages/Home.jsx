@@ -42,7 +42,8 @@ const FALLBACK_COURSES = [
       "Hygiene & Care Techniques",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500&q=80",
+    // ✅ PARLOUR IMAGE
+    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=500&q=80",
   },
   {
     id: 4,
@@ -66,34 +67,55 @@ const FALLBACK_STATS = [
   { number: 96, suffix: "%", label: "Placement Rate" },
 ];
 
-const FALLBACK_PLACEMENTS = [
-  { id: 1, name: "Ritika Sharma", role: "Web Developer", company: "Placed — Noida", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80" },
-  { id: 2, name: "Aman Verma", role: "Digital Marketing Executive", company: "Placed — Delhi", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80" },
-  { id: 3, name: "Suresh Kumar", role: "Electrical Technician", company: "Placed — Ghaziabad", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80" },
-  { id: 4, name: "Priya Singh", role: "Accounts Executive", company: "Placed — Meerut", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80" },
-];
-
+// ✅ FALLBACK TESTIMONIALS
 const FALLBACK_TESTIMONIALS = [
   {
     id: 1,
-    name: "Ritika Sharma",
+    name: "Priya Sharma",
     place: "Noida",
-    message: "The trainers made every concept practical from day one. I built real projects during the course, and that portfolio is exactly what got me hired.",
+    course: "Salon Skills",
+    message: "The hands-on training at Jawahar Global Foundation changed my life. Within 2 months of completing my Salon course, I got placed at Lakmé.",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
   },
   {
     id: 2,
-    name: "Suresh Kumar",
+    name: "Vikram Singh",
     place: "Ghaziabad",
-    message: "Hands-on workshop sessions gave me confidence I couldn't get from books alone. The placement team followed up until I actually had an offer in hand.",
+    course: "Mechanic Basics",
+    message: "I was skeptical about vocational training at first, but the Mechanic course at JGF is world-class. Now I'm working at Maruti Suzuki.",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
   },
   {
     id: 3,
-    name: "Priya Singh",
-    place: "Meerut",
-    message: "Batch timings were flexible around my schedule, and the Diploma I earned is recognised by every employer I've spoken to since.",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    name: "Sneha Patel",
+    place: "Bangalore",
+    course: "Parlour Skills",
+    message: "The Parlour Skills course was incredibly detailed. The trainers were supportive and the placement team found me a great opportunity at VLCC.",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+  },
+  {
+    id: 4,
+    name: "Rahul Verma",
+    place: "Delhi",
+    course: "Electrician Fundamentals",
+    message: "Electrical work requires precision and safety. The Electrician course at JGF taught me everything I needed to know.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+  },
+  {
+    id: 5,
+    name: "Ananya Reddy",
+    place: "Hyderabad",
+    course: "Salon Skills",
+    message: "I always wanted to work in the beauty industry but didn't know where to start. The Salon course at JGF gave me the perfect foundation.",
+    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=200&q=80",
+  },
+  {
+    id: 6,
+    name: "Arjun Kumar",
+    place: "Gurugram",
+    course: "Mechanic Basics",
+    message: "After 12th, I didn't have many options. The Mechanic course at JGF gave me a career.",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80",
   },
 ];
 
@@ -107,17 +129,49 @@ const UPCOMING_BATCHES = [
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
+// ✅ FIXED: useFetch with image merge
 function useFetch(endpoint, fallback) {
   const [data, setData] = useState(fallback);
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
+    setLoading(true);
     fetch(`${API}${endpoint}`)
       .then((r) => r.json())
       .then((res) => {
-        if (res.success && res.data?.length > 0) setData(res.data);
+        let coursesData = [];
+        if (res.success && res.data?.length > 0) {
+          coursesData = res.data;
+        } else if (Array.isArray(res) && res.length > 0) {
+          coursesData = res;
+        }
+        
+        // ✅ MERGE: API data + Fallback images
+        if (coursesData.length > 0) {
+          const mergedCourses = coursesData.map((course) => {
+            const fallbackCourse = fallback.find(f => f.slug === course.slug);
+            return {
+              ...course,
+              // ✅ Fallback image use karo agar API mein image nahi hai
+              coverImageUrl: course.coverImageUrl || fallbackCourse?.coverImageUrl,
+              duration: course.duration || fallbackCourse?.duration || "",
+              level: course.level || fallbackCourse?.level || "",
+              features: course.features || fallbackCourse?.features || [],
+            };
+          });
+          setData(mergedCourses);
+        } else {
+          setData(fallback);
+        }
+        setLoading(false);
       })
-      .catch(() => {});
+      .catch(() => {
+        setData(fallback);
+        setLoading(false);
+      });
   }, [endpoint]);
-  return data;
+  
+  return { data, loading };
 }
 
 function useCountUp(target, duration = 1400) {
@@ -151,13 +205,523 @@ function useCountUp(target, duration = 1400) {
   return [value, ref];
 }
 
+// ✅ PLACEMENTS FETCH
+function useFetchPlacements() {
+  const [placements, setPlacements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    
+    const token = localStorage.getItem("admin_token");
+    
+    fetch(`${API}/api/admin/placements`, {
+      headers: {
+        "Authorization": token ? `Bearer ${token}` : "",
+      },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to fetch");
+        return r.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const activePlacements = data.filter(p => p.isActive !== false);
+          setPlacements(activePlacements);
+        } else {
+          setPlacements([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setPlacements([]);
+        setLoading(false);
+      });
+  }, []);
+
+  return { placements, loading };
+}
+
+// ✅ TESTIMONIALS FETCH
+function useFetchTestimonials() {
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    
+    const token = localStorage.getItem("admin_token");
+    
+    fetch(`${API}/api/admin/testimonials`, {
+      headers: {
+        "Authorization": token ? `Bearer ${token}` : "",
+      },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to fetch");
+        return r.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const activeTestimonials = data.filter(t => t.isActive !== false);
+          setTestimonials(activeTestimonials);
+        } else {
+          setTestimonials([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setTestimonials([]);
+        setLoading(false);
+      });
+  }, []);
+
+  return { testimonials, loading };
+}
+
+// ─── COURSE CARD ──────────────────────────────────────────────────
+function CourseCard({ course }) {
+  const navigate = useNavigate();
+
+  const goToCourse = (slug) => {
+    navigate(`/courses/${slug}`);
+  };
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => goToCourse(course.slug)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          goToCourse(course.slug);
+        }
+      }}
+      className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col cursor-pointer border border-slate-100 hover:border-[#F2A93B]/40 hover:-translate-y-2"
+    >
+      <div className="h-48 overflow-hidden relative">
+        {course.coverImageUrl ? (
+          <img
+            src={course.coverImageUrl}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            onError={(e) => {
+              const fallback = FALLBACK_COURSES.find(f => f.slug === course.slug);
+              if (fallback?.coverImageUrl) {
+                e.target.src = fallback.coverImageUrl;
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#0B2545]/5 to-[#0B2545]/10 flex items-center justify-center">
+            <span className="text-gray-400 text-sm">No Image</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+        {course.duration && (
+          <span className="absolute top-4 left-4 bg-[#0B2545]/90 backdrop-blur-sm text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/10">
+            {course.duration}
+          </span>
+        )}
+        {course.level && (
+          <span className="absolute top-4 right-4 bg-[#F2A93B]/90 backdrop-blur-sm text-[#0B2545] text-[11px] font-bold px-3 py-1.5 rounded-full">
+            {course.level}
+          </span>
+        )}
+      </div>
+
+      <div className="p-5 md:p-6 flex flex-col flex-1">
+        <h3 className="font-sora font-bold text-[#0B2545] text-lg leading-snug mb-1 line-clamp-1">
+          {course.title}
+        </h3>
+        <ul className="space-y-2 mt-3 mb-5 flex-1">
+          {(course.features || []).slice(0, 3).map((f, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+              <span className="text-[#F2A93B] font-bold mt-0.5 text-lg">✓</span>
+              <span className="line-clamp-1">{f}</span>
+            </li>
+          ))}
+        </ul>
+        <Link
+          to={`/courses/${course.slug}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            goToCourse(course.slug);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+              goToCourse(course.slug);
+            }
+          }}
+          className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-3 rounded-xl transition-all duration-300 group-hover:shadow-lg"
+        >
+          Enroll Now
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── COURSES SLIDER ──────────────────────────────────────────────────
+function CoursesSlider({ courses }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const autoPlayRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const slidesToShow = 3;
+  const totalSlides = courses.length;
+
+  const getVisibleCourses = () => {
+    const result = [];
+    for (let i = 0; i < slidesToShow; i++) {
+      const idx = (currentIndex + i) % totalSlides;
+      result.push(courses[idx]);
+    }
+    return result;
+  };
+
+  const nextSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev + 1) % totalSlides);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  const prevSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  useEffect(() => {
+    if (totalSlides < 4) {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+        autoPlayRef.current = null;
+      }
+      return;
+    }
+    
+    autoPlayRef.current = setInterval(() => {
+      if (!isPaused) {
+        nextSlide();
+      }
+    }, 2000);
+
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+        autoPlayRef.current = null;
+      }
+    };
+  }, [totalSlides, isPaused]);
+
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
+
+  if (totalSlides < 4) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {courses.map((course) => (
+          <CourseCard key={course.id || course.slug} course={course} />
+        ))}
+      </div>
+    );
+  }
+
+  const visibleCourses = getVisibleCourses();
+
+  return (
+    <div 
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
+          {visibleCourses.map((course, idx) => (
+            <div key={`${course.id || course.slug}-${currentIndex}-${idx}`} className="animate-fadeIn">
+              <CourseCard course={course} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {totalSlides >= 4 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute -left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 border border-slate-200 z-10"
+            aria-label="Previous slides"
+          >
+            ←
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute -right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 border border-slate-200 z-10"
+            aria-label="Next slides"
+          >
+            →
+          </button>
+        </>
+      )}
+
+      {totalSlides >= 4 && (
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: totalSlides }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                if (isAnimating) return;
+                setIsAnimating(true);
+                setCurrentIndex(idx);
+                setTimeout(() => setIsAnimating(false), 500);
+              }}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                currentIndex === idx 
+                  ? "w-8 bg-[#F2A93B]" 
+                  : "w-2 bg-slate-300 hover:bg-slate-400"
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── PLACEMENT CARD ──────────────────────────────────────────────────
+function PlacementCard({ placement }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 p-6 flex flex-col items-center text-center hover:-translate-y-1">
+      <div className="relative">
+        <img
+          src={placement.image}
+          alt={placement.name}
+          className="w-20 h-20 rounded-full object-cover border-4 border-[#F2A93B]/30 hover:border-[#F2A93B] transition-all duration-300"
+          onError={(e) => {
+            e.target.src = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80";
+          }}
+        />
+        <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      </div>
+      <div className="font-sora font-bold text-[#0B2545] text-base mt-3">{placement.name}</div>
+      <div className="text-[#F2A93B] text-xs font-semibold mt-1">{placement.role}</div>
+      <div className="text-slate-400 text-xs mt-2 bg-gray-50 px-3 py-1 rounded-full">{placement.company}</div>
+    </div>
+  );
+}
+
+// ─── STUDENTS PLACED AUTO-SLIDER ──────────────────────────────────
+function PlacedStudents({ placements }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const autoPlayRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const totalSlides = placements.length;
+  const slidesToShow = 4;
+
+  const getVisiblePlacements = () => {
+    const result = [];
+    for (let i = 0; i < slidesToShow; i++) {
+      const idx = (currentIndex + i) % totalSlides;
+      result.push(placements[idx]);
+    }
+    return result;
+  };
+
+  const nextSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev + 1) % totalSlides);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  const prevSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  useEffect(() => {
+    if (totalSlides <= slidesToShow) {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+        autoPlayRef.current = null;
+      }
+      return;
+    }
+
+    autoPlayRef.current = setInterval(() => {
+      if (!isPaused) {
+        nextSlide();
+      }
+    }, 3000);
+
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+        autoPlayRef.current = null;
+      }
+    };
+  }, [currentIndex, totalSlides, isPaused]);
+
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
+
+  if (totalSlides === 0) {
+    return null;
+  }
+
+  if (totalSlides <= slidesToShow) {
+    return (
+      <>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between flex-wrap gap-4 mb-12">
+          <div>
+            <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-widest bg-[#F2A93B]/10 px-4 py-1.5 rounded-full inline-block mb-4">
+              Success Stories
+            </span>
+            <h2 className="font-sora font-extrabold text-3xl md:text-4xl text-[#0B2545]">
+              Our Students <span className="text-[#F2A93B]">Placed</span> Recently
+            </h2>
+            <p className="text-slate-500 mt-2">Real results from real training — 1000+ students placed</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {placements.map((p) => (
+            <PlacementCard key={p.id} placement={p} />
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  const visiblePlacements = getVisiblePlacements();
+
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between flex-wrap gap-4 mb-12">
+        <div>
+          <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-widest bg-[#F2A93B]/10 px-4 py-1.5 rounded-full inline-block mb-4">
+            Success Stories
+          </span>
+          <h2 className="font-sora font-extrabold text-3xl md:text-4xl text-[#0B2545]">
+            Our Students <span className="text-[#F2A93B]">Placed</span> Recently
+          </h2>
+          <p className="text-slate-500 mt-2">Real results from real training — 1000+ students placed</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={prevSlide}
+            className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 hover:shadow-lg"
+          >
+            ←
+          </button>
+          <button
+            onClick={nextSlide}
+            className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 hover:shadow-lg"
+          >
+            →
+          </button>
+        </div>
+      </div>
+
+      <div 
+        className="relative"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+            {visiblePlacements.map((p, idx) => (
+              <div key={`${p.id}-${currentIndex}-${idx}`} className="animate-fadeIn">
+                <PlacementCard placement={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {totalSlides > slidesToShow && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="absolute -left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 border border-slate-200 z-10"
+              aria-label="Previous"
+            >
+              ←
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 border border-slate-200 z-10"
+              aria-label="Next"
+            >
+              →
+            </button>
+          </>
+        )}
+
+        {totalSlides > slidesToShow && (
+          <div className="flex justify-center gap-2 mt-6">
+            {Array.from({ length: totalSlides }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  if (isAnimating) return;
+                  setIsAnimating(true);
+                  setCurrentIndex(idx);
+                  setTimeout(() => setIsAnimating(false), 500);
+                }}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentIndex === idx 
+                    ? "w-8 bg-[#F2A93B]" 
+                    : "w-2 bg-slate-300 hover:bg-slate-400"
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
+
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+          }
+        `}</style>
+      </div>
+    </>
+  );
+}
+
 // ─── SECTIONS ───────────────────────────────────────────────────────────────
 
-// 1. HERO - Professional Design
+// 1. HERO
 function Hero({ courseCount }) {
   return (
     <section className="relative min-h-screen flex items-center bg-[#0B2545] overflow-hidden font-inter">
-      {/* Animated Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_rgba(242,169,59,0.15),_transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,_rgba(242,169,59,0.08),_transparent_50%)]" />
@@ -167,7 +731,6 @@ function Hero({ courseCount }) {
 
       <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-28 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left Content */}
           <div className="text-center lg:text-left">
             <div className="inline-flex items-center gap-2 bg-[#F2A93B]/10 border border-[#F2A93B]/20 rounded-full px-4 py-1.5 mb-6">
               <span className="w-2 h-2 bg-[#F2A93B] rounded-full animate-pulse" />
@@ -205,7 +768,6 @@ function Hero({ courseCount }) {
               </Link>
             </div>
 
-            {/* Trust Indicators */}
             <div className="mt-12 flex flex-wrap gap-8 justify-center lg:justify-start">
               <div className="text-center">
                 <div className="text-white font-sora font-extrabold text-3xl">{courseCount}+</div>
@@ -222,7 +784,6 @@ function Hero({ courseCount }) {
             </div>
           </div>
 
-          {/* Right Image */}
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
               <img
@@ -233,7 +794,6 @@ function Hero({ courseCount }) {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/50 via-transparent to-transparent" />
             </div>
 
-            {/* Floating Badge */}
             <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-xl px-5 py-4 hidden sm:block">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#F2A93B]/20 flex items-center justify-center text-[#F2A93B] font-bold text-lg">✓</div>
@@ -244,7 +804,6 @@ function Hero({ courseCount }) {
               </div>
             </div>
 
-            {/* Floating Stats */}
             <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl px-4 py-3 hidden lg:block">
               <div className="text-center">
                 <div className="text-[#F2A93B] font-sora font-extrabold text-xl">100%</div>
@@ -275,18 +834,11 @@ function BatchTicker() {
   );
 }
 
-// 3. COURSES GRID - Professional Design
+// 3. COURSES GRID WITH SLIDER
 function CoursesSection({ courses }) {
-  const navigate = useNavigate();
-
-  const goToCourse = (slug) => {
-    navigate(`/courses/${slug}`);
-  };
-
   return (
     <section className="py-20 md:py-28 bg-gray-50 font-inter">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-widest bg-[#F2A93B]/10 px-4 py-1.5 rounded-full inline-block mb-4">
             Courses
@@ -300,75 +852,7 @@ function CoursesSection({ courses }) {
           <div className="w-16 h-1 bg-[#F2A93B] rounded-full mx-auto mt-4" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {courses.map((c) => (
-            <div
-              key={c.id || c.slug}
-              role="button"
-              tabIndex={0}
-              onClick={() => goToCourse(c.slug)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  goToCourse(c.slug);
-                }
-              }}
-              className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col cursor-pointer border border-slate-100 hover:border-[#F2A93B]/40 hover:-translate-y-2"
-            >
-              <div className="h-48 overflow-hidden relative">
-                {c.coverImageUrl ? (
-                  <img
-                    src={c.coverImageUrl}
-                    alt={c.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#0B2545]" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                {c.duration && (
-                  <span className="absolute top-4 left-4 bg-[#0B2545]/90 backdrop-blur-sm text-white text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/10">
-                    {c.duration}
-                  </span>
-                )}
-                {c.level && (
-                  <span className="absolute top-4 right-4 bg-[#F2A93B]/90 backdrop-blur-sm text-[#0B2545] text-[11px] font-bold px-3 py-1.5 rounded-full">
-                    {c.level}
-                  </span>
-                )}
-              </div>
-
-              <div className="p-5 md:p-6 flex flex-col flex-1">
-                <h3 className="font-sora font-bold text-[#0B2545] text-lg leading-snug mb-1">
-                  {c.title}
-                </h3>
-                <ul className="space-y-2 mt-3 mb-5 flex-1">
-                  {(c.features || []).slice(0, 3).map((f, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <span className="text-[#F2A93B] font-bold mt-0.5 text-lg">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to={`/courses/${c.slug}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goToCourse(c.slug);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      goToCourse(c.slug);
-                    }
-                  }}
-                  className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-3 rounded-xl transition-all duration-300 group-hover:shadow-lg"
-                >
-                  Enroll Now
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+        <CoursesSlider courses={courses} />
 
         <div className="text-center mt-12">
           <Link
@@ -384,7 +868,7 @@ function CoursesSection({ courses }) {
   );
 }
 
-// 4. STATS COUNTER - Professional Design
+// 4. STATS COUNTER
 function StatCard({ stat }) {
   const [value, ref] = useCountUp(stat.number);
   return (
@@ -413,87 +897,37 @@ function StatsSection() {
   );
 }
 
-// 5. STUDENTS PLACED CAROUSEL - Professional Design
-function PlacedStudents({ placements }) {
-  const scrollRef = useRef(null);
-  const scroll = (dir) => {
-    scrollRef.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
-  };
-
-  return (
-    <section className="py-20 md:py-28 bg-white font-inter">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between flex-wrap gap-4 mb-12">
-          <div>
-            <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-widest bg-[#F2A93B]/10 px-4 py-1.5 rounded-full inline-block mb-4">
-              Success Stories
-            </span>
-            <h2 className="font-sora font-extrabold text-3xl md:text-4xl text-[#0B2545]">
-              Students placed recently
-            </h2>
-            <p className="text-slate-500 mt-2">Real results from real training</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => scroll(-1)}
-              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 hover:shadow-lg"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => scroll(1)}
-              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 hover:shadow-lg"
-            >
-              →
-            </button>
-          </div>
-        </div>
-
-        <div ref={scrollRef} className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
-          {placements.map((p) => (
-            <div
-              key={p.id}
-              className="shrink-0 w-64 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 p-6 flex flex-col items-center text-center hover:-translate-y-1"
-            >
-              <div className="relative">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-20 h-20 rounded-full object-cover border-4 border-[#F2A93B]/30 group-hover:border-[#F2A93B] transition-all duration-300"
-                />
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-              <div className="font-sora font-bold text-[#0B2545] text-base mt-3">{p.name}</div>
-              <div className="text-[#F2A93B] text-xs font-semibold mt-1">{p.role}</div>
-              <div className="text-slate-400 text-xs mt-2 bg-gray-50 px-3 py-1 rounded-full">{p.company}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// 6. TESTIMONIALS - Professional Design
+// 6. TESTIMONIALS
 function TestimonialsSection({ testimonials }) {
   const [current, setCurrent] = useState(0);
   const t = testimonials[current];
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((c) => (c + 1) % testimonials.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
   const prev = () => setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length);
   const next = () => setCurrent((c) => (c + 1) % testimonials.length);
+
+  if (testimonials.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-20 md:py-28 bg-gray-50 font-inter">
       <div className="max-w-4xl mx-auto px-4 text-center">
-        <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-widest bg-[#F2A93B]/10 px-4 py-1.5 rounded-full inline-block mb-4">
+        <span className="inline-block bg-[#F2A93B]/10 text-[#F2A93B] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
           Testimonials
         </span>
-        <h2 className="font-sora font-extrabold text-3xl md:text-4xl text-[#0B2545] mb-12">
-          What our students say
+        <h2 className="font-sora font-extrabold text-3xl md:text-4xl text-[#0B2545] mb-4">
+          What Our <span className="text-[#F2A93B]">Students</span> Say
         </h2>
+        <p className="text-slate-500 text-sm mb-12 max-w-2xl mx-auto">
+          Real stories from real students who transformed their careers
+        </p>
 
         <div className="relative bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-slate-100">
           <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -509,21 +943,29 @@ function TestimonialsSection({ testimonials }) {
             alt={t.name}
             className="w-16 h-16 rounded-full object-cover mx-auto mb-6 border-4 border-white shadow-lg mt-4"
           />
+
+          <div className="inline-block bg-[#F2A93B]/10 text-[#F2A93B] text-xs font-bold px-3 py-1 rounded-full mb-4">
+            {t.course}
+          </div>
+
           <p className="text-slate-600 text-base md:text-lg leading-relaxed italic mb-6 max-w-2xl mx-auto">
             "{t.message}"
           </p>
+
           <p className="font-sora font-bold text-[#0B2545] text-base">{t.name}</p>
           <p className="text-slate-400 text-sm">{t.place}</p>
 
           <button
             onClick={prev}
             className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 border border-slate-100"
+            aria-label="Previous testimonial"
           >
             ←
           </button>
           <button
             onClick={next}
             className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B2545] hover:bg-[#0B2545] hover:text-white transition-all duration-300 border border-slate-100"
+            aria-label="Next testimonial"
           >
             →
           </button>
@@ -537,6 +979,7 @@ function TestimonialsSection({ testimonials }) {
               className={`h-2 rounded-full transition-all duration-300 ${
                 i === current ? "w-8 bg-[#F2A93B]" : "w-2 bg-slate-300 hover:bg-slate-400"
               }`}
+              aria-label={`Go to testimonial ${i + 1}`}
             />
           ))}
         </div>
@@ -545,7 +988,7 @@ function TestimonialsSection({ testimonials }) {
   );
 }
 
-// 7. FINAL CTA - Professional Design
+// 7. FINAL CTA
 function FinalCTA() {
   return (
     <section className="py-20 md:py-28 bg-[#0B2545] font-inter relative overflow-hidden">
@@ -587,10 +1030,13 @@ function FinalCTA() {
 // ─── MAIN HOME PAGE ─────────────────────────────────────────────────────────
 
 export default function Home() {
-  const courses = useFetch("/api/courses", FALLBACK_COURSES);
-  const placements = useFetch("/api/placements", FALLBACK_PLACEMENTS);
-  const testimonials = useFetch("/api/testimonials", FALLBACK_TESTIMONIALS);
-  const displayCourses = Array.isArray(courses) ? courses.slice(0, 8) : FALLBACK_COURSES;
+  const { data: courses } = useFetch("/api/courses", FALLBACK_COURSES);
+  const { placements } = useFetchPlacements();
+  const { testimonials } = useFetchTestimonials();
+  
+  const displayCourses = Array.isArray(courses) && courses.length > 0 ? courses : FALLBACK_COURSES;
+  const displayPlacements = placements.length > 0 ? placements : [];
+  const displayTestimonials = testimonials.length > 0 ? testimonials : [];
 
   return (
     <main>
@@ -598,10 +1044,8 @@ export default function Home() {
       <BatchTicker />
       <CoursesSection courses={displayCourses} />
       <StatsSection />
-      <PlacedStudents placements={Array.isArray(placements) ? placements : FALLBACK_PLACEMENTS} />
-      <TestimonialsSection
-        testimonials={Array.isArray(testimonials) ? testimonials : FALLBACK_TESTIMONIALS}
-      />
+      <PlacedStudents placements={displayPlacements} />
+      <TestimonialsSection testimonials={displayTestimonials} />
       <FinalCTA />
     </main>
   );

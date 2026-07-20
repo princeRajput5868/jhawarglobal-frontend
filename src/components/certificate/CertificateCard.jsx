@@ -1,18 +1,24 @@
 import React from "react";
-import isoLogo from "../../assets/logos/iso.jpg"; // apne folder structure ke hisab se path change karo
+import isoLogo from "../../assets/logos/iso.jpg";
 import certifiedLogo from "../../assets/logos/certified.jpg";
 import guaranteeLogo from "../../assets/logos/gurantee.jpg";
 import jgfLogo from "../../assets/logos/jgf-badge-logo.png";
-import msme from "../../assets/logos/msme.jpg"; // apne folder structure ke hisab se path change karo
-import skillLogo from "../../assets/logos/startupindia.png"; // apne folder structure ke hisab se path change karo
+import msme from "../../assets/logos/msme.jpg";
+import skillLogo from "../../assets/logos/startupindia.png";
+
+
+import directorSignature from "../../assets/signatures/director-signature.png";
+// ↑ Director signature image path
+import studyCenterSignature from "../../assets/signatures/studycenter-signature.png";
+// ↑ Study Center signature image path - yahan apni image daalo
 
 /* ── QR placeholder ── */
 function QRPlaceholder({ value }) {
   return (
     <div
       style={{
-        width: 98,
-        height: 98,
+        width: 88,
+        height: 88,
         border: "2px solid #14306b",
         borderRadius: 4,
         display: "flex",
@@ -21,10 +27,9 @@ function QRPlaceholder({ value }) {
         background: "#fff",
         padding: 3,
         flexShrink: 0,
-        marginLeft:180,
       }}
     >
-      <svg viewBox="0 0 21 21" width="86" height="86" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 21 21" width="76" height="76" xmlns="http://www.w3.org/2000/svg">
         <rect x="1" y="1" width="7" height="7" fill="none" stroke="#000" strokeWidth="1" />
         <rect x="2.5" y="2.5" width="4" height="4" fill="#000" />
         <rect x="13" y="1" width="7" height="7" fill="none" stroke="#000" strokeWidth="1" />
@@ -52,7 +57,7 @@ function QRPlaceholder({ value }) {
   );
 }
 
-/* ── Small compact certified badge (ISO style, rectangular) ── */
+/* ── Small compact certified badge ── */
 function CertifiedBadge() {
   return (
     <div
@@ -87,12 +92,10 @@ function CertifiedBadge() {
   );
 }
 
-/* ── Generic "registered" badge (laurel, non-official) — replaces MSME emblem ── */
 function RegistrationBadge() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 , height:120 , width: 130, marginLeft:5,}}>
-      <img 
-      
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, height: 120, width: 130, marginLeft: 5 }}>
+      <img
         src={msme}
         alt="msme"
         style={{ width: 130, height: 130, objectFit: "contain" }}
@@ -100,11 +103,10 @@ function RegistrationBadge() {
           e.target.style.display = "none";
         }}
       />
-      </div>
+    </div>
   );
 }
 
-/* ── Generic skill-development badge (non-official) — replaces Startup India mark ── */
 function SkillBadge() {
   return (
     <div
@@ -112,7 +114,6 @@ function SkillBadge() {
         display: "flex",
         alignItems: "center",
         gap: 6,
-        // border: "1.5px solid #16A34A",
         borderRadius: 8,
         padding: "6px 10px",
         height: 100,
@@ -128,7 +129,6 @@ function SkillBadge() {
           e.target.style.display = "none";
         }}
       />
-    
     </div>
   );
 }
@@ -181,21 +181,13 @@ function CornerRibbon({ corner }) {
           </filter>
         </defs>
 
-        {/* blue frame corner sitting behind the ribbon */}
         <path d="M0,0 H120 V16 H16 V120 H0 Z" fill="#0B4EA2" />
 
         <g filter={`url(#ribbonShadow-${corner})`}>
           <g transform="translate(46,46) rotate(-45)">
-            {/* main ribbon strip */}
             <rect x="-95" y="-21" width="190" height="42" rx="3" fill={`url(#ribbonFace-${corner})`} />
-
-            {/* top gloss highlight */}
             <rect x="-95" y="-21" width="190" height="10" rx="3" fill="#FFF6C9" opacity="0.55" />
-
-            {/* bottom shade for volume */}
             <rect x="-95" y="13" width="190" height="8" rx="3" fill="#B87800" opacity="0.35" />
-
-            {/* folded-back flap revealing the underside of the ribbon */}
             <path
               d="M -70,21 L -40,21 L -70,51 Z"
               fill={`url(#ribbonFold-${corner})`}
@@ -230,7 +222,6 @@ function formatDate(d) {
   return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 }
 
-/* Tiled faint background watermark pattern (data-uri SVG) */
 const tiledPatternUrl =
   "data:image/svg+xml," +
   encodeURIComponent(`
@@ -240,11 +231,6 @@ const tiledPatternUrl =
     </svg>
   `);
 
-/**
- * Print-stable JGF certificate.
- * Goal: Chrome Print/PDF output matches the on-screen preview by using a fixed-size A4 landscape container
- * and structured Flex/Grid layout (no negative margin shifting).
- */
 export default function CertificateCard({ certificate, qrValue, printId = "certificate-print" }) {
   if (!certificate) return null;
 
@@ -278,7 +264,6 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
         height: "210mm",
       }}
     >
-      {/* Scoped print CSS */}
       <style>{`
         @media print {
           #${printId}, #${printId} * {
@@ -306,7 +291,6 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
         }
       `}</style>
 
-      {/* Inner content box — fills 100% of the outer bordered frame */}
       <div
         style={{
           position: "relative",
@@ -323,10 +307,8 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
           zIndex: 1,
         }}
       >
-        <div>
-          
-        </div>
-        {/* Tiled faint watermark */}
+        <div></div>
+
         <div
           aria-hidden
           style={{
@@ -339,35 +321,11 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
           }}
         />
 
-        {/* Diagonal SAMPLE watermark - only show in development */}
-        {/* {import.meta.env.DEV && (
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: "42%",
-              left: "50%",
-              transform: "rotate(-28deg)",
-              fontSize: 78,
-              fontWeight: 900,
-              color: "rgba(214,51,108,0.10)",
-              pointerEvents: "none",
-              userSelect: "none",
-              letterSpacing: 6,
-              zIndex: 1,
-              whiteSpace: "nowrap",
-            }}
-          >
-            SAMPLE
-          </div>
-        )} */}
-
         <CornerRibbon corner="top-left" />
         <CornerRibbon corner="top-right" />
         <CornerRibbon corner="bottom-left" />
         <CornerRibbon corner="bottom-right" />
 
-        {/* Main content grid */}
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           {/* Header */}
           <div style={{ display: "grid", gridTemplateColumns: "90px 1fr 60px", columnGap: 12, alignItems: "start" }}>
@@ -424,18 +382,17 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
             <div style={{ width: 60 }} />
           </div>
 
-          {/* Body: left column / center text / right photo */}
-          <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 90px", columnGap: 16, marginTop: 14 }}>
-            {/* Left column */}
+          {/* Body: left column / center text / right column with Photo + QR */}
+          <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 100px", columnGap: 16, marginTop: 14, flex: 1 }}>
+            {/* LEFT COLUMN - Badges */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, width: 100, flexShrink: 0 }}>
-              <QRPlaceholder value={qrValue} />
               <RegistrationBadge />
               <CertifiedBadge />
               <SkillBadge />
             </div>
 
-            {/* Center column */}
-            <div style={{ textAlign: "center", padding: "0 2px" , marginTop:26, }}>
+            {/* CENTER COLUMN - Certificate Text */}
+            <div style={{ textAlign: "center", padding: "0 2px", marginTop: 26 }}>
               <svg viewBox="0 0 300 46" width="100%" height="50" style={{ maxWidth: 320, margin: "0 auto", display: "block" }}>
                 <defs>
                   <linearGradient id="ribbonGrad" x1="0" y1="0" x2="1" y2="0">
@@ -491,7 +448,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                 </p>
               </div>
 
-              {/* Enrollment / certificate details — directly under the certificate text */}
+              {/* Enrollment / certificate details */}
               <div
                 style={{
                   marginTop: 22,
@@ -501,7 +458,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                   rowGap: 10,
                   fontSize: 14.5,
                   textAlign: "left",
-                  marginLeft:110,
+                  marginLeft: 110,
                 }}
               >
                 <p style={{ margin: 0 }}>
@@ -527,8 +484,9 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               </div>
             </div>
 
-            {/* Right column */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 90, flexShrink: 0 }}>
+            {/* RIGHT COLUMN - Photo + QR */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 100, flexShrink: 0, gap: 10 }}>
+              {/* Student Photo */}
               {photoUrl ? (
                 <div
                   style={{
@@ -540,7 +498,6 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginRight:160,
                   }}
                 >
                   <img
@@ -580,10 +537,15 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                   No Photo
                 </div>
               )}
+
+              {/* QR Code */}
+              <QRPlaceholder value={qrValue} />
             </div>
           </div>
 
-          {/* Signature row */}
+          {/* ════════════════════════════════════════════════════════════ */}
+          {/* 🔥 SIGNATURE ROW - BOTH SIGNATURES SET 🔥                  */}
+      
           <div
             style={{
               marginTop: "auto",
@@ -596,11 +558,45 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               flexShrink: 0,
             }}
           >
+            {/* Left - Study Center (with Signature Image) */}
             <div style={{ textAlign: "center", minWidth: 120 }}>
-              <div style={{ width: 130, height: 1, background: "#555", margin: "0 auto 6px" }} />
+              {/* 🔥 STUDY CENTER SIGNATURE IMAGE - PERMANENT SET 🔥 */}
+              <img
+                src={studyCenterSignature}
+                alt="Study Center Signature"
+                style={{
+                  width: 140,
+                  height: 70,
+                  objectFit: "contain",
+                  display: "block",
+                  margin: "0 auto",
+                }}
+                onError={(e) => {
+                  // Agar image load na ho to fallback show kare
+                  e.target.style.display = "none";
+                  const parent = e.target.parentElement;
+                  const fallback = document.createElement("div");
+                  fallback.style.cssText = `
+                    width: 130px;
+                    height: 40px;
+                    margin: 0 auto;
+                    border-bottom: 1px solid #555;
+                  `;
+                  parent.insertBefore(fallback, e.target);
+                }}
+              />
+              {/* Fallback line - agar image na ho */}
+              <div style={{ 
+                width: 130, 
+                height: 1, 
+                background: "#555", 
+                margin: "4px auto 6px",
+                display: "block",
+              }} />
               <p style={{ fontSize: 13, fontWeight: 800, color: "#14306b", margin: 0 }}>Study Center</p>
             </div>
 
+            {/* Center - Logos */}
             <div
               style={{
                 display: "flex",
@@ -621,22 +617,40 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               />
             </div>
 
+            {/* Right - Director (with Signature Image) */}
             <div style={{ textAlign: "center", minWidth: 150 }}>
-              <svg
-                viewBox="0 0 160 45"
-                width="150"
-                height="42"
-                style={{ display: "block", margin: "0 auto" }}
-              >
-                <path
-                  d="M10,32 C18,10 26,10 32,26 C36,36 40,18 46,14 C52,10 54,30 60,28 C66,26 66,12 74,16 C82,20 84,34 92,30 C100,26 98,12 108,14 C116,15.5 118,26 128,22 C136,18.8 140,14 148,18"
-                  fill="none"
-                  stroke="#1a2a5e"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div style={{ width: 150, height: 1, background: "#555", margin: "2px auto 6px" }} />
+              {/* 🔥 DIRECTOR SIGNATURE IMAGE - PERMANENT SET 🔥 */}
+              <img
+                src={directorSignature}
+                alt="Director Signature"
+                style={{
+                  width: 150,
+                  height: 55,
+                  objectFit: "contain",
+                  display: "block",
+                  margin: "0 auto",
+                }}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  const parent = e.target.parentElement;
+                  const fallback = document.createElement("div");
+                  fallback.style.cssText = `
+                    width: 140px;
+                    height: 50px;
+                    margin: 0 auto;
+                    border-bottom: 1px solid #555;
+                  `;
+                  parent.insertBefore(fallback, e.target);
+                }}
+              />
+              {/* Fallback line */}
+              <div style={{ 
+                width: 150, 
+                height: 1, 
+                background: "#555", 
+                margin: "2px auto 6px",
+                display: "block",
+              }} />
               <p style={{ fontSize: 13, fontWeight: 800, color: "#14306b", margin: 0 }}>Director</p>
               <p style={{ fontSize: 12, fontWeight: 700, color: "#14306b", margin: 0 }}>{signatoryName}</p>
             </div>

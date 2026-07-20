@@ -1,12 +1,23 @@
 import React, { useMemo, useState } from "react";
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle, AlertCircle, Building, Globe, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { 
+  MapPin, Phone, Mail, Clock, Send, CheckCircle, 
+  AlertCircle, Building, Globe, MessageCircle, 
+  Users, Award, Star, ArrowRight, Shield,
+  MessageSquare, ExternalLink
+} from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", subject: "" });
+  const [form, setForm] = useState({ 
+    name: "", 
+    email: "", 
+    phone: "", 
+    message: "", 
+    subject: "" 
+  });
   const [status, setStatus] = useState(null);
-
   const isLoading = status === "loading";
 
   const submit = async (e) => {
@@ -29,6 +40,12 @@ export default function Contact() {
       if (res.ok) {
         setStatus("submitted");
         setForm({ name: "", email: "", phone: "", message: "", subject: "" });
+        
+        // ✅ WhatsApp Message - Admin ko notify karega
+        const adminWhatsApp = "918170848420"; // Admin WhatsApp Number
+        const messageText = `New Contact Form Submission%0A%0A📌 Name: ${form.name}%0A📧 Email: ${form.email}%0A📱 Phone: ${form.phone || 'N/A'}%0A📝 Subject: ${form.subject || 'N/A'}%0A💬 Message: ${form.message}`;
+        window.open(`https://wa.me/${adminWhatsApp}?text=${messageText}`, '_blank');
+        
         return;
       }
 
@@ -40,79 +57,107 @@ export default function Contact() {
     }
   };
 
+  const contactInfo = [
+    {
+      icon: <Phone className="w-6 h-6" />,
+      title: "Phone",
+      details: "+91 98765 43210",
+      link: "tel:+919876543210",
+    },
+    {
+      icon: <Mail className="w-6 h-6" />,
+      title: "Email",
+      details: "info@jawaharglobalfoundation.org",
+      link: "mailto:info@jawaharglobalfoundation.org",
+    },
+    {
+      icon: <MapPin className="w-6 h-6" />,
+      title: "Location",
+      details: "Saharanpur, Uttar Pradesh – 247001",
+      link: "#",
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      title: "Working Hours",
+      details: "Mon – Sat: 9:00 AM – 6:00 PM",
+      link: "#",
+    },
+  ];
+
   return (
-    <main className="bg-white">
+    <main className="bg-white font-inter">
       {/* Hero Section */}
-      <section className="relative bg-[#0B2545] py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(242,169,59,0.15),_transparent_55%)]" />
+      <section className="relative bg-[#0B2545] py-20 md:py-28 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_rgba(242,169,59,0.15),_transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,_rgba(242,169,59,0.08),_transparent_50%)]" />
+          <div className="absolute top-20 right-20 w-72 h-72 bg-[#F2A93B]/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-[#F2A93B]/5 rounded-full blur-3xl" />
+        </div>
+        
         <div className="container mx-auto px-4 text-center relative">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F2A93B]/20 rounded-full mb-4">
-            <MessageCircle className="w-8 h-8 text-[#F2A93B]" />
+          <div className="inline-flex items-center gap-2 bg-[#F2A93B]/10 border border-[#F2A93B]/20 rounded-full px-4 py-1.5 mb-6">
+            <span className="w-2 h-2 bg-[#F2A93B] rounded-full animate-pulse" />
+            <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-wider">
+              Contact Us
+            </span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-sora font-extrabold text-white mb-4">
-            Get in Touch
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold text-white leading-tight">
+            Get in <span className="text-[#F2A93B]">Touch</span>
           </h1>
-          <p className="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
+          <p className="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mt-4">
             Have questions, feedback, or want to partner with us? Reach out and our team will get back to you.
           </p>
+          <div className="w-20 h-1 bg-[#F2A93B] rounded-full mx-auto mt-6" />
         </div>
       </section>
 
       {/* Contact Info Cards */}
-      <section className="py-12 md:py-16 bg-gray-50">
+      <section className="py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-[#F2A93B]/10 rounded-lg flex items-center justify-center mb-4">
-                <Phone className="w-6 h-6 text-[#F2A93B]" />
-              </div>
-              <h3 className="font-bold text-[#0B2545] text-sm mb-2">Phone</h3>
-              <a href="tel:+971000000000" className="text-gray-600 text-sm hover:text-[#F2A93B] transition-colors">
-                +971 00 000 0000
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {contactInfo.map((item, index) => (
+              <a
+                key={index}
+                href={item.link}
+                className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-[#F2A93B]/30 hover:-translate-y-2"
+              >
+                <div className="w-14 h-14 bg-[#F2A93B]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#F2A93B]/20 transition-all duration-300">
+                  <div className="text-[#F2A93B] group-hover:scale-110 transition-transform duration-300">
+                    {item.icon}
+                  </div>
+                </div>
+                <h3 className="font-sora font-bold text-[#0B2545] text-sm mb-1">{item.title}</h3>
+                <p className="text-gray-600 text-sm group-hover:text-[#0B2545] transition-colors duration-300">
+                  {item.details}
+                </p>
               </a>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-[#F2A93B]/10 rounded-lg flex items-center justify-center mb-4">
-                <Mail className="w-6 h-6 text-[#F2A93B]" />
-              </div>
-              <h3 className="font-bold text-[#0B2545] text-sm mb-2">Email</h3>
-              <a href="mailto:info@jawaharglobal.com" className="text-gray-600 text-sm hover:text-[#F2A93B] transition-colors">
-                info@jawaharglobal.com
-              </a>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-[#F2A93B]/10 rounded-lg flex items-center justify-center mb-4">
-                <MapPin className="w-6 h-6 text-[#F2A93B]" />
-              </div>
-              <h3 className="font-bold text-[#0B2545] text-sm mb-2">Location</h3>
-              <p className="text-gray-600 text-sm">Dubai, UAE (by appointment)</p>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-[#F2A93B]/10 rounded-lg flex items-center justify-center mb-4">
-                <Clock className="w-6 h-6 text-[#F2A93B]" />
-              </div>
-              <h3 className="font-bold text-[#0B2545] text-sm mb-2">Working Hours</h3>
-              <p className="text-gray-600 text-sm">Mon–Thu: 9AM – 5:30PM</p>
-              <p className="text-gray-600 text-sm">Fri: 9AM – 1PM</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Form + Info Section */}
-      <section className="py-12 md:py-20 bg-white">
+      <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-14 md:mb-20">
+            <span className="inline-block bg-[#F2A93B]/10 text-[#F2A93B] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
+              Send Message
+            </span>
+            <h2 className="text-3xl md:text-4xl font-sora font-extrabold text-[#0B2545]">
+              We'd Love to <span className="text-[#F2A93B]">Hear</span> From You
+            </h2>
+            <div className="w-16 h-1 bg-[#F2A93B] rounded-full mx-auto mt-4" />
+            <p className="text-gray-500 text-sm md:text-base mt-4 max-w-2xl mx-auto">
+              Fill in the form below and our team will get back to you within 1-2 business days.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12">
             {/* Form - 3 columns */}
             <div className="lg:col-span-3">
-              <div className="bg-gray-50 rounded-2xl p-6 md:p-8 lg:p-10">
-                <h2 className="text-2xl font-sora font-extrabold text-[#0B2545] mb-2">Send us a message</h2>
-                <p className="text-gray-500 text-sm mb-6">We'll get back to you within 1-2 business days.</p>
-
-                <form onSubmit={submit} className="space-y-4">
+              <div className="bg-gray-50 rounded-2xl p-6 md:p-8 lg:p-10 border border-gray-100">
+                <form onSubmit={submit} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
@@ -120,10 +165,10 @@ export default function Contact() {
                       </label>
                       <input
                         required
-                        placeholder="John Doe"
+                        placeholder="Enter your full name"
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        className="w-full border border-gray-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#F2A93B] focus:border-transparent outline-none transition bg-white"
+                        className="w-full border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#F2A93B]/20 focus:border-[#F2A93B] outline-none transition bg-white"
                         disabled={isLoading}
                       />
                     </div>
@@ -134,10 +179,10 @@ export default function Contact() {
                       <input
                         required
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder="Enter your email"
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        className="w-full border border-gray-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#F2A93B] focus:border-transparent outline-none transition bg-white"
+                        className="w-full border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#F2A93B]/20 focus:border-[#F2A93B] outline-none transition bg-white"
                         disabled={isLoading}
                       />
                     </div>
@@ -149,10 +194,10 @@ export default function Contact() {
                         Phone Number
                       </label>
                       <input
-                        placeholder="+971 50 000 0000"
+                        placeholder="Enter your phone number"
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                        className="w-full border border-gray-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#F2A93B] focus:border-transparent outline-none transition bg-white"
+                        className="w-full border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#F2A93B]/20 focus:border-[#F2A93B] outline-none transition bg-white"
                         disabled={isLoading}
                       />
                     </div>
@@ -164,7 +209,7 @@ export default function Contact() {
                         placeholder="Course Inquiry"
                         value={form.subject}
                         onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                        className="w-full border border-gray-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#F2A93B] focus:border-transparent outline-none transition bg-white"
+                        className="w-full border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#F2A93B]/20 focus:border-[#F2A93B] outline-none transition bg-white"
                         disabled={isLoading}
                       />
                     </div>
@@ -179,33 +224,47 @@ export default function Contact() {
                       placeholder="Tell us how we can help you..."
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="w-full border border-gray-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#F2A93B] focus:border-transparent outline-none transition bg-white h-32 resize-none"
+                      className="w-full border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#F2A93B]/20 focus:border-[#F2A93B] outline-none transition bg-white h-36 resize-none"
                       disabled={isLoading}
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`w-full bg-[#F2A93B] hover:bg-[#e0993a] text-[#0B2545] font-bold py-4 rounded-lg transition flex items-center justify-center gap-2 ${
-                      isLoading ? "opacity-70 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-[#0B2545] border-t-transparent rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-5 h-5" />
-                        Send Message
-                      </>
-                    )}
-                  </button>
+                  {/* WhatsApp + Submit Button */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className={`flex-1 bg-[#F2A93B] hover:bg-[#e0993a] text-[#0B2545] font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-[#F2A93B]/30 group ${
+                        isLoading ? "opacity-70 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-[#0B2545] border-t-transparent rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                          Send Message
+                        </>
+                      )}
+                    </button>
+
+                    {/* WhatsApp Button - Direct Chat */}
+                    <a
+                      href="https://wa.me/918170848420"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-[#25D366]/30 group"
+                    >
+                      <MessageSquare className="w-5 h-5 mr-2" />
+                      WhatsApp
+                    </a>
+                  </div>
 
                   {status === "submitted" && (
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3 animate-fadeIn">
                       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-green-700 font-semibold">Message sent successfully!</p>
@@ -215,7 +274,7 @@ export default function Contact() {
                   )}
 
                   {status && typeof status === "object" && status.type === "error" && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-fadeIn">
                       <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-red-700 font-semibold">Error</p>
@@ -229,27 +288,39 @@ export default function Contact() {
 
             {/* Sidebar - 2 columns */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-[#0B2545] rounded-2xl p-6 md:p-8 text-white">
-                <h3 className="font-sora font-bold text-xl mb-4">What happens next?</h3>
-                <ol className="space-y-4">
+              <div className="bg-[#0B2545] rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#F2A93B]/5 rounded-full blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#F2A93B]/5 rounded-full blur-2xl" />
+                
+                <h3 className="font-sora font-bold text-xl mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-[#F2A93B]" />
+                  What happens next?
+                </h3>
+                <ol className="space-y-4 relative">
                   <li className="flex items-start gap-3">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-[#F2A93B]/20 text-[#F2A93B] rounded-full text-sm font-bold flex-shrink-0 mt-0.5">1</span>
+                    <span className="inline-flex items-center justify-center w-7 h-7 bg-[#F2A93B]/20 text-[#F2A93B] rounded-full text-sm font-bold flex-shrink-0 mt-0.5 border border-[#F2A93B]/30">
+                      1
+                    </span>
                     <div>
-                      <p className="font-semibold">We review your message</p>
+                      <p className="font-semibold text-white">We review your message</p>
                       <p className="text-slate-300 text-sm">We route it to the right team</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-[#F2A93B]/20 text-[#F2A93B] rounded-full text-sm font-bold flex-shrink-0 mt-0.5">2</span>
+                    <span className="inline-flex items-center justify-center w-7 h-7 bg-[#F2A93B]/20 text-[#F2A93B] rounded-full text-sm font-bold flex-shrink-0 mt-0.5 border border-[#F2A93B]/30">
+                      2
+                    </span>
                     <div>
-                      <p className="font-semibold">We respond via email</p>
+                      <p className="font-semibold text-white">We respond via email</p>
                       <p className="text-slate-300 text-sm">Within 1-2 business days</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-[#F2A93B]/20 text-[#F2A93B] rounded-full text-sm font-bold flex-shrink-0 mt-0.5">3</span>
+                    <span className="inline-flex items-center justify-center w-7 h-7 bg-[#F2A93B]/20 text-[#F2A93B] rounded-full text-sm font-bold flex-shrink-0 mt-0.5 border border-[#F2A93B]/30">
+                      3
+                    </span>
                     <div>
-                      <p className="font-semibold">We resolve your request</p>
+                      <p className="font-semibold text-white">We resolve your request</p>
                       <p className="text-slate-300 text-sm">We may request additional details</p>
                     </div>
                   </li>
@@ -257,33 +328,62 @@ export default function Contact() {
               </div>
 
               <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100">
-                <h3 className="font-sora font-bold text-[#0B2545] text-lg mb-4">Common topics</h3>
+                <h3 className="font-sora font-bold text-[#0B2545] text-lg mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#F2A93B]" />
+                  Common topics
+                </h3>
                 <ul className="space-y-3">
-                  <li className="flex items-center gap-3 text-gray-600 text-sm">
-                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full" />
+                  <li className="flex items-center gap-3 text-gray-600 text-sm hover:text-[#0B2545] transition-colors duration-200">
+                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full flex-shrink-0" />
                     Course inquiries & enrollment support
                   </li>
-                  <li className="flex items-center gap-3 text-gray-600 text-sm">
-                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full" />
+                  <li className="flex items-center gap-3 text-gray-600 text-sm hover:text-[#0B2545] transition-colors duration-200">
+                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full flex-shrink-0" />
                     Partnerships & collaborations
                   </li>
-                  <li className="flex items-center gap-3 text-gray-600 text-sm">
-                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full" />
+                  <li className="flex items-center gap-3 text-gray-600 text-sm hover:text-[#0B2545] transition-colors duration-200">
+                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full flex-shrink-0" />
                     Media / press requests
                   </li>
-                  <li className="flex items-center gap-3 text-gray-600 text-sm">
-                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full" />
+                  <li className="flex items-center gap-3 text-gray-600 text-sm hover:text-[#0B2545] transition-colors duration-200">
+                    <div className="w-1.5 h-1.5 bg-[#F2A93B] rounded-full flex-shrink-0" />
                     Certificates & verification questions
                   </li>
                 </ul>
               </div>
 
-              <div className="bg-[#F2A93B]/10 rounded-2xl p-6 md:p-8 border border-[#F2A93B]/20">
-                <h3 className="font-sora font-bold text-[#0B2545] text-lg mb-2">💡 Pro Tip</h3>
-                <p className="text-gray-600 text-sm">
+              <div className="bg-gradient-to-br from-[#F2A93B]/10 to-[#F2A93B]/5 rounded-2xl p-6 md:p-8 border border-[#F2A93B]/20 relative overflow-hidden">
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#F2A93B]/10 rounded-full blur-2xl" />
+                <h3 className="font-sora font-bold text-[#0B2545] text-lg mb-2 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-[#F2A93B] fill-[#F2A93B]" />
+                  Pro Tip
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
                   Include as many details as possible (name, topic, and any relevant links). 
                   This helps us resolve your request faster.
                 </p>
+              </div>
+
+              {/* WhatsApp Contact Card */}
+              <div className="bg-[#25D366]/10 rounded-2xl p-6 md:p-8 border border-[#25D366]/20 relative overflow-hidden">
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-[#25D366]/10 rounded-full blur-2xl" />
+                <h3 className="font-sora font-bold text-[#0B2545] text-lg mb-2 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-[#25D366]" />
+                  Chat on WhatsApp
+                </h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Get instant support from our team via WhatsApp.
+                </p>
+                <a
+                  href="https://wa.me/918170848420"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-[#25D366]/30 group"
+                >
+                  <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Chat Now
+                  <ExternalLink className="w-4 h-4 ml-1" />
+                </a>
               </div>
             </div>
           </div>
@@ -291,19 +391,54 @@ export default function Contact() {
       </section>
 
       {/* Map Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-            <div className="h-64 md:h-80 bg-gray-200 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-12 h-12 text-[#F2A93B] mx-auto mb-2" />
-                <p className="text-gray-500">Dubai, UAE</p>
-                <p className="text-gray-400 text-sm">Find us on Google Maps</p>
+          <div className="text-center mb-10">
+            <h3 className="font-sora font-bold text-2xl text-[#0B2545]">Find Us</h3>
+            <div className="w-16 h-1 bg-[#F2A93B] rounded-full mx-auto mt-2" />
+          </div>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+            <div className="h-64 md:h-80 bg-gradient-to-br from-[#0B2545]/5 to-[#0B2545]/10 flex items-center justify-center relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-[#F2A93B]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MapPin className="w-10 h-10 text-[#F2A93B]" />
+                  </div>
+                  <p className="text-[#0B2545] font-semibold text-lg">Saharanpur, Uttar Pradesh</p>
+                  <p className="text-gray-400 text-sm">India — 247001</p>
+                  <a 
+                    href="https://maps.google.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-3 text-[#F2A93B] font-semibold text-sm hover:gap-3 transition-all duration-300"
+                  >
+                    View on Google Maps
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
     </main>
   );
 }

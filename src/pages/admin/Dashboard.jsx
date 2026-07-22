@@ -187,6 +187,13 @@ export default function AdminDashboard() {
       link: "/admin/courses/new",
       color: "#F59E0B",
     },
+    {
+  title: "Settings",
+  description: "Manage certificate name and organization settings",
+  icon: <Settings className="w-6 h-6" />,
+  link: "/admin/settings",
+  color: "#8B5CF6",
+},
   ];
 
   return (

@@ -15,22 +15,23 @@ import About from "./pages/About";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import CourseLearn from "./pages/CourseLearn";
-import Mycertificates from "./pages/MyCertificates";
-import certificate from "./pages/Certificate";
+import MyCertificates from "./pages/MyCertificates";
+import Certificate from "./pages/Certificate"; // ✅ FIXED: Uppercase C
 import VerifyDiploma from "./pages/VerifyDiploma";
 
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminCourseModules from "./pages/admin/CoursesModules";
-import Admincertificates from "./pages/admin/AdminCertificates";
-import AdmincertificatePreview from "./pages/admin/AdminCertificatePreview";
-import AdminCertificateEdit from "./pages/admin/AdminCertificateEdit";
+import AdminCertificates from "./pages/admin/AdminCertificates"; // ✅ FIXED: Uppercase C
+import AdminCertificatePreview from "./pages/admin/AdminCertificatePreview"; // ✅ FIXED: Uppercase C
+import AdminCertificateEdit from "./pages/admin/AdminCertificateEdit"; // ✅ FIXED: Uppercase C
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseForm from "./pages/admin/AdminCourseForm";
 import AdminPlacements from "./pages/admin/AdminPlacements";
 import AdminPlacementForm from "./pages/admin/AdminPlacementForm";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminTestimonialForm from "./pages/admin/AdminTestimonialForm";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 function App() {
   const location = useLocation();
@@ -56,9 +57,9 @@ function App() {
         <Route path="/courses/:slug" element={<CourseDetail />} />
         <Route path="/courses/:slug/learn" element={<CourseLearn />} />
         
-        {/* Certificate Routes */}
-        <Route path="/certificates" element={<Mycertificates />} />
-        <Route path="/certificates/:certificateId" element={<certificate />} />
+        {/* ✅ Certificate Routes - FIXED */}
+        <Route path="/certificates" element={<MyCertificates />} />
+        <Route path="/certificates/:certificateId" element={<Certificate />} /> {/* ✅ Uppercase C */}
         <Route path="/verify-diploma" element={<VerifyDiploma />} />
 
         {/* Legacy Redirects */}
@@ -71,10 +72,10 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         
-        {/* Admin - Certificates */}
-        <Route path="/admin/certificates" element={<Admincertificates />} />
-        <Route path="/admin/certificates/:certificateId/preview" element={<AdmincertificatePreview />} />
-        <Route path="/admin/certificates/:id/edit" element={<AdminCertificateEdit />} />
+        {/* ✅ Admin - Certificates - FIXED */}
+        <Route path="/admin/certificates" element={<AdminCertificates />} /> {/* ✅ Uppercase C */}
+        <Route path="/admin/certificates/:certificateId/preview" element={<AdminCertificatePreview />} /> {/* ✅ Uppercase C */}
+        <Route path="/admin/certificates/:id/edit" element={<AdminCertificateEdit />} /> {/* ✅ Uppercase C */}
         
         {/* Admin - Courses */}
         <Route path="/admin/courses" element={<AdminCourses />} />
@@ -91,6 +92,9 @@ function App() {
         <Route path="/admin/testimonials" element={<AdminTestimonials />} />
         <Route path="/admin/testimonials/new" element={<AdminTestimonialForm />} />
         <Route path="/admin/testimonials/:id/edit" element={<AdminTestimonialForm />} />
+        
+        {/* Admin - Settings */}
+        <Route path="/admin/settings" element={<AdminSettings />} />
         
         {/* Admin - Catch All */}
         <Route path="/admin/*" element={<Navigate to="/admin" replace />} />

@@ -1,16 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import isoLogo from "../../assets/logos/iso.jpg";
 import certifiedLogo from "../../assets/logos/certified.jpg";
 import guaranteeLogo from "../../assets/logos/gurantee.jpg";
 import jgfLogo from "../../assets/logos/jgf-badge-logo.png";
 import msme from "../../assets/logos/msme.jpg";
 import skillLogo from "../../assets/logos/startupindia.png";
-
-
 import directorSignature from "../../assets/signatures/director-signature.png";
-// ↑ Director signature image path
 import studyCenterSignature from "../../assets/signatures/studycenter-signature.png";
-// ↑ Study Center signature image path - yahan apni image daalo
+import { adminApi } from "../../lib/adminApi";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 /* ── QR placeholder ── */
 function QRPlaceholder({ value }) {
@@ -82,7 +81,6 @@ function CertifiedBadge() {
           objectFit: "contain",
         }}
       />
-
       <div style={{ lineHeight: 1.15 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: "#15803D" }}>ISO</div>
         <div style={{ fontSize: 10, fontWeight: 700, color: "#15803D" }}>9001:2015</div>
@@ -232,11 +230,54 @@ const tiledPatternUrl =
   `);
 
 export default function CertificateCard({ certificate, qrValue, printId = "certificate-print" }) {
+  const [certificateName, setCertificateName] = useState("Diploma");
+
+  // ✅ Fetch certificate name from settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await adminApi.get("/api/admin/settings");
+        const data = res.data;
+        setCertificateName(data.certificate_name || "Diploma");
+      } catch (error) {
+        console.error("Failed to fetch settings:", error);
+        setCertificateName("Diploma");
+      }
+    };
+    fetchSettings();
+  }, []);
+
   if (!certificate) return null;
 
   const meta = certificate.meta || {};
 
-  const photoUrl = meta?.photoUrl || certificate?.photoUrl || null;
+  // ✅ FIX: Properly resolve photo URL
+  let photoUrl = null;
+  if (meta?.photoUrl) {
+    const raw = String(meta.photoUrl).trim();
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      photoUrl = raw;
+    } else if (raw.startsWith('/uploads/')) {
+      photoUrl = `${API}${raw}`;
+    } else if (raw.startsWith('uploads/')) {
+      photoUrl = `${API}/${raw}`;
+    } else {
+      // Try to construct URL
+      photoUrl = `${API}/uploads/certificates/${raw.split('/').pop()}`;
+    }
+  } else if (certificate?.photoUrl) {
+    const raw = String(certificate.photoUrl).trim();
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      photoUrl = raw;
+    } else if (raw.startsWith('/uploads/')) {
+      photoUrl = `${API}${raw}`;
+    } else {
+      photoUrl = `${API}/uploads/certificates/${raw.split('/').pop()}`;
+    }
+  }
+
+  console.log("📸 Photo URL resolved:", photoUrl);
+
   const courseTitle = meta?.courseTitle || certificate?.courseTitle || certificate?.courseSlug || "—";
 
   const guardianRelation = meta?.guardianRelation || "S/O";
@@ -287,7 +328,15 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
           #${printId} img {
             -webkit-user-select: none;
             user-select: none;
+            max-width: 100% !important;
           }
+          .no-print {
+            display: none !important;
+          }
+        }
+        @page {
+          size: A4 landscape;
+          margin: 0;
         }
       `}</style>
 
@@ -307,8 +356,6 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
           zIndex: 1,
         }}
       >
-        <div></div>
-
         <div
           aria-hidden
           style={{
@@ -382,7 +429,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
             <div style={{ width: 60 }} />
           </div>
 
-          {/* Body: left column / center text / right column with Photo + QR */}
+          {/* Body */}
           <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 100px", columnGap: 16, marginTop: 14, flex: 1 }}>
             {/* LEFT COLUMN - Badges */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, width: 100, flexShrink: 0 }}>
@@ -413,7 +460,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                   fill="#7B1C1C"
                   letterSpacing="2"
                 >
-                  Diploma
+                  {certificateName}
                 </text>
               </svg>
 
@@ -466,7 +513,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                   <span style={{ color: "#111" }}>{enrollmentNo}</span>
                 </p>
                 <p style={{ margin: 0 }}>
-                  <strong style={{ color: "#14306b", fontWeight: 800 }}>certificate No. :</strong>{" "}
+                  <strong style={{ color: "#14306b", fontWeight: 800 }}>Certificate No. :</strong>{" "}
                   <span style={{ color: "#111" }}>{certificate.certificateNumber}</span>
                 </p>
                 <p style={{ margin: 0 }}>
@@ -484,9 +531,9 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               </div>
             </div>
 
-            {/* RIGHT COLUMN - Photo + QR */}
+            {/* RIGHT COLUMN - Photo + QR - FIXED */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 100, flexShrink: 0, gap: 10 }}>
-              {/* Student Photo */}
+              {/* ✅ Student Photo - FIXED */}
               {photoUrl ? (
                 <div
                   style={{
@@ -510,11 +557,12 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                       display: "block",
                     }}
                     onError={(e) => {
+                      console.error("❌ Photo load error:", photoUrl);
                       e.target.style.display = "none";
                       const parent = e.target.parentElement;
                       const fallback = document.createElement("div");
                       fallback.style.cssText = "font-size: 9px; color: #aaa; text-align: center; padding: 4px;";
-                      fallback.textContent = "Photo not available";
+                      fallback.textContent = "📷 No Photo";
                       parent.appendChild(fallback);
                     }}
                   />
@@ -534,7 +582,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                     padding: 4,
                   }}
                 >
-                  No Photo
+                  📷 No Photo
                 </div>
               )}
 
@@ -543,9 +591,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
             </div>
           </div>
 
-          {/* ════════════════════════════════════════════════════════════ */}
-          {/* 🔥 SIGNATURE ROW - BOTH SIGNATURES SET 🔥                  */}
-      
+          {/* Signatures */}
           <div
             style={{
               marginTop: "auto",
@@ -558,9 +604,8 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               flexShrink: 0,
             }}
           >
-            {/* Left - Study Center (with Signature Image) */}
+            {/* Left - Study Center */}
             <div style={{ textAlign: "center", minWidth: 120 }}>
-              {/* 🔥 STUDY CENTER SIGNATURE IMAGE - PERMANENT SET 🔥 */}
               <img
                 src={studyCenterSignature}
                 alt="Study Center Signature"
@@ -572,20 +617,9 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                   margin: "0 auto",
                 }}
                 onError={(e) => {
-                  // Agar image load na ho to fallback show kare
                   e.target.style.display = "none";
-                  const parent = e.target.parentElement;
-                  const fallback = document.createElement("div");
-                  fallback.style.cssText = `
-                    width: 130px;
-                    height: 40px;
-                    margin: 0 auto;
-                    border-bottom: 1px solid #555;
-                  `;
-                  parent.insertBefore(fallback, e.target);
                 }}
               />
-              {/* Fallback line - agar image na ho */}
               <div style={{ 
                 width: 130, 
                 height: 1, 
@@ -617,9 +651,8 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               />
             </div>
 
-            {/* Right - Director (with Signature Image) */}
+            {/* Right - Director */}
             <div style={{ textAlign: "center", minWidth: 150 }}>
-              {/* 🔥 DIRECTOR SIGNATURE IMAGE - PERMANENT SET 🔥 */}
               <img
                 src={directorSignature}
                 alt="Director Signature"
@@ -632,18 +665,8 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                 }}
                 onError={(e) => {
                   e.target.style.display = "none";
-                  const parent = e.target.parentElement;
-                  const fallback = document.createElement("div");
-                  fallback.style.cssText = `
-                    width: 140px;
-                    height: 50px;
-                    margin: 0 auto;
-                    border-bottom: 1px solid #555;
-                  `;
-                  parent.insertBefore(fallback, e.target);
                 }}
               />
-              {/* Fallback line */}
               <div style={{ 
                 width: 150, 
                 height: 1, 
@@ -675,7 +698,7 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               flexShrink: 0,
             }}
           >
-            This certificate may be verified online using certificate No. {certificate.certificateNumber}
+            This {certificateName.toLowerCase()} may be verified online using {certificateName} No. {certificate.certificateNumber}
           </div>
         </div>
       </div>

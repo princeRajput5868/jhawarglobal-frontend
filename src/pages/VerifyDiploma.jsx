@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Search, Award, Calendar, User, Building, Loader2, Shield, FileCheck, Clock } from "lucide-react";
+import { 
+  CheckCircle, XCircle, Search, Award, Calendar, User, 
+  Building, Loader2, Shield, FileCheck, Clock, Eye, 
+  QrCode, Copy, Check
+} from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -9,6 +13,7 @@ export default function VerifyDiploma() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -26,17 +31,32 @@ export default function VerifyDiploma() {
       const response = await fetch(`${API}/api/certificates/verify/${certificateId.trim()}`);
       const data = await response.json();
 
+      console.log('🔍 Full API Response:', data);
+
       if (!response.ok) {
         throw new Error(data.message || "Certificate not found");
       }
 
-      setResult(data);
+      const certificateData = data.certificate || data;
+      
+      setResult({
+        isValid: true,
+        data: certificateData
+      });
+
     } catch (err) {
+      console.error('❌ Error:', err);
       setError(err.message || "Failed to verify certificate");
       setResult(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(certificateId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -63,7 +83,7 @@ export default function VerifyDiploma() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
-        {/* Search Form - Professional Card */}
+        {/* Search Form */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8 lg:p-10 mb-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-[#F2A93B]/10 rounded-lg flex items-center justify-center">
@@ -88,12 +108,25 @@ export default function VerifyDiploma() {
                   value={certificateId}
                   onChange={(e) => setCertificateId(e.target.value)}
                   placeholder="e.g., JGF-189312-F75E39"
-                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-[#F2A93B] focus:ring-4 focus:ring-[#F2A93B]/10 outline-none transition-all duration-300 bg-gray-50/50"
+                  className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:border-[#F2A93B] focus:ring-4 focus:ring-[#F2A93B]/10 outline-none transition-all duration-300 bg-gray-50/50"
                   disabled={loading}
                 />
+                {certificateId && (
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    {copied ? (
+                      <Check className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <Copy className="w-5 h-5 text-gray-400" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end gap-3">
               <button
                 type="submit"
                 disabled={loading || !certificateId.trim()}
@@ -125,104 +158,146 @@ export default function VerifyDiploma() {
           )}
         </div>
 
-        {/* Result Section - Professional Design */}
-        {result && (
+        {/* Result Section */}
+        {result && result.isValid && result.data && (
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-8 animate-fadeIn">
-            {/* Status Banner */}
-            <div className={`p-6 md:p-8 ${result.isValid ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200' : 'bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-200'}`}>
+            <div className="p-6 md:p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
               <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center ${result.isValid ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                  {result.isValid ? (
-                    <CheckCircle className="w-8 h-8 text-green-600" />
-                  ) : (
-                    <XCircle className="w-8 h-8 text-red-600" />
-                  )}
+                <div className="w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
                 <div>
-                  <h2 className={`text-2xl font-sora font-extrabold ${result.isValid ? 'text-green-700' : 'text-red-700'}`}>
-                    {result.isValid ? 'Valid Certificate' : 'Invalid Certificate'}
+                  <h2 className="text-2xl font-sora font-extrabold text-green-700">
+                    ✅ Valid Certificate
                   </h2>
-                  <p className={`text-sm ${result.isValid ? 'text-green-600' : 'text-red-600'}`}>
-                    {result.isValid ? 'This certificate is authentic and verified' : 'This certificate could not be verified'}
+                  <p className="text-sm text-green-600">
+                    This certificate is authentic and verified
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Certificate Details */}
-            {result.isValid && result.data && (
-              <div className="p-6 md:p-8 lg:p-10">
-                <h3 className="text-lg font-sora font-bold text-[#0B2545] mb-6 flex items-center gap-2">
+            <div className="p-6 md:p-8 lg:p-10">
+              <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <h3 className="text-lg font-sora font-bold text-[#0B2545] flex items-center gap-2">
                   <Award className="w-5 h-5 text-[#F2A93B]" />
                   Certificate Details
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-5">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <User className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student Name</p>
-                        <p className="text-gray-800 font-semibold">{result.data.studentName || "N/A"}</p>
-                      </div>
+                <Link
+                  to={`/certificates/${result.data.id || result.data.certificateNumber || certificateId}`}
+                  className="inline-flex items-center gap-2 bg-[#0B2545] hover:bg-[#1a3a6e] text-white font-bold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-[#0B2545]/30 text-sm"
+                >
+                  <Eye className="w-4 h-4" />
+                  Show Certificate
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                    <User className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student Name</p>
+                      <p className="text-gray-800 font-semibold text-lg">{result.data.fullName || "N/A"}</p>
                     </div>
-                    
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <Award className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Course</p>
-                        <p className="text-gray-800 font-semibold">{result.data.courseTitle || "N/A"}</p>
-                      </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Award className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Course</p>
+                      <p className="text-gray-800 font-semibold">
+                        {result.data.meta?.courseTitle || result.data.courseTitle || result.data.courseslug || "N/A"}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="space-y-5">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <Calendar className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Issue Date</p>
-                        <p className="text-gray-800 font-semibold">
-                          {result.data.issueDate ? new Date(result.data.issueDate).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          }) : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <Building className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Certificate ID</p>
-                        <p className="text-gray-800 font-mono text-sm font-bold">{result.data.certificateId || certificateId}</p>
-                      </div>
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                    <User className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Guardian</p>
+                      <p className="text-gray-800 font-semibold">
+                        {result.data.meta?.guardianName 
+                          ? `${result.data.meta.guardianRelation || ''} ${result.data.meta.guardianName}` 
+                          : "N/A"}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Verification Badge - Professional */}
-                <div className="mt-8 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-ping absolute" />
-                    <div className="w-3 h-3 bg-green-500 rounded-full relative" />
+                <div className="space-y-5">
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Calendar className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Date of Birth</p>
+                      <p className="text-gray-800 font-semibold">
+                        {result.data.meta?.dob 
+                          ? new Date(result.data.meta.dob).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            }) 
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-green-700 font-medium text-sm">
-                    Verified on {new Date().toLocaleString('en-IN', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
+
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Building className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Certificate ID</p>
+                      <p className="text-gray-800 font-mono text-sm font-bold">
+                        {result.data.certificateNumber || result.data.verificationId || certificateId}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Award className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Duration & Grade</p>
+                      <p className="text-gray-800 font-semibold">
+                        {result.data.meta?.duration || "N/A"} • Grade: {result.data.meta?.grade || "N/A"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
+
+              {/* ✅ QR CODE SECTION REMOVED - Only "View Full Certificate" button remains */}
+              <div className="mt-8 flex justify-end">
+                <Link
+                  to={`/certificates/${result.data.id || result.data.certificateNumber || certificateId}`}
+                  className="flex items-center justify-center gap-2 bg-[#F2A93B] hover:bg-[#e0993a] text-[#0B2545] font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  <Eye className="w-5 h-5" />
+                  View Full Certificate
+                  <span className="text-sm">→</span>
+                </Link>
+              </div>
+
+              {/* Verification Badge */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-ping absolute" />
+                  <div className="w-3 h-3 bg-green-500 rounded-full relative" />
+                </div>
+                <span className="text-green-700 font-medium text-sm">
+                  ✅ Verified on {new Date().toLocaleString('en-IN', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Instructions - Professional Design */}
+        {/* Instructions */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
             <div className="flex items-center gap-3 mb-4">
@@ -287,6 +362,13 @@ export default function VerifyDiploma() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes ping {
+          0% { transform: scale(1); opacity: 1; }
+          75%, 100% { transform: scale(2); opacity: 0; }
+        }
+        .animate-ping {
+          animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
         }
       `}</style>
     </div>

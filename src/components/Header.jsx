@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import logo from "../assets/foundation_logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import { Phone, Mail, Menu, X, ChevronDown } from "lucide-react";
+import { Phone, Mail, Menu, X, ChevronDown, Heart } from "lucide-react";
 
 import {
   FaFacebookF,
@@ -34,15 +34,12 @@ const Header = () => {
     const controlHeader = () => {
       const currentScrollY = window.scrollY;
       
-      // Scrolling down - hide
       if (currentScrollY > lastScrollY && currentScrollY > 80) {
         setIsVisible(false);
       } 
-      // Scrolling up - show
       else if (currentScrollY < lastScrollY) {
         setIsVisible(true);
       }
-      // At top - show
       else if (currentScrollY < 80) {
         setIsVisible(true);
       }
@@ -113,7 +110,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Navbar - ✅ Sticky Top with Hide/Show Animation */}
+      {/* Navbar */}
       <header 
         className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-md border-b border-red-100 transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
@@ -213,6 +210,15 @@ const Header = () => {
               <Link to="/contact" className="hover:text-[#C62828] transition">
                 Contact
               </Link>
+
+              {/* ✅ DONATION BUTTON */}
+              <Link
+                to="/donate"
+                className="inline-flex items-center gap-2 bg-[#C62828] hover:bg-[#8E0000] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-[#C62828]/30 transform hover:-translate-y-0.5"
+              >
+                <Heart className="w-4 h-4" />
+                Donate Now
+              </Link>
             </nav>
 
             {/* Mobile Menu Button */}
@@ -234,6 +240,16 @@ const Header = () => {
               <Link to="/courses" onClick={() => setMobileMenu(false)}>Courses</Link>
               <Link to="/gallery" onClick={() => setMobileMenu(false)}>Gallery</Link>
               <Link to="/contact" onClick={() => setMobileMenu(false)}>Contact</Link>
+              
+              {/* ✅ Mobile Donation Button */}
+              <Link
+                to="/donate"
+                onClick={() => setMobileMenu(false)}
+                className="inline-flex items-center justify-center gap-2 bg-[#C62828] hover:bg-[#8E0000] text-white px-5 py-3 rounded-full font-bold text-sm transition-all duration-300 mt-2"
+              >
+                <Heart className="w-4 h-4" />
+                Donate Now
+              </Link>
             </div>
           </div>
         )}

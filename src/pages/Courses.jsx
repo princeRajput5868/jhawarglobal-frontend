@@ -57,7 +57,7 @@ const FALLBACK_COURSES = [
       "Real Client Practice",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgPtalOPAGP1lZ8O5GTBrt8NrjKBnjjKhuHGjvuf-opg&s=10",
   },
 ];
 

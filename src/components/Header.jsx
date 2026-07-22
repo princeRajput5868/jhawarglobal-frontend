@@ -19,11 +19,43 @@ const Header = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [aboutDropdown, setAboutDropdown] = useState(false);
   const [programDropdown, setProgramDropdown] = useState(false);
+  
+  // ✅ Scroll State
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const visitorId = useMemo(() => getOrCreateVisitorId(), []);
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [coursesError, setCoursesError] = useState(null);
+
+  // ✅ Scroll Handler - Hide/Show Header
+  useEffect(() => {
+    const controlHeader = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Scrolling down - hide
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setIsVisible(false);
+      } 
+      // Scrolling up - show
+      else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      }
+      // At top - show
+      else if (currentScrollY < 80) {
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", controlHeader);
+
+    return () => {
+      window.removeEventListener("scroll", controlHeader);
+    };
+  }, [lastScrollY]);
 
   // Fetch courses
   useEffect(() => {
@@ -81,8 +113,12 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-md border-b border-red-100">
+      {/* Navbar - ✅ Sticky Top with Hide/Show Animation */}
+      <header 
+        className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-md border-b border-red-100 transition-transform duration-300 ${
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-24">
             {/* Logo */}

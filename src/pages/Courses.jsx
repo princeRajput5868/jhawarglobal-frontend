@@ -44,7 +44,7 @@ const FALLBACK_COURSES = [
       "Placement Assistance",
     ],
     // ✅ NEW IMAGE FOR PARLOUR SKILLS
-    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=500&q=80",
+    coverImageUrl: "https://plus.unsplash.com/premium_photo-1664048713210-9db5ee2a7e08?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cGFybG91cnxlbnwwfHwwfHx8MA%3D%3D",
   },
   {
     id: 4,

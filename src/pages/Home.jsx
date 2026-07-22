@@ -342,7 +342,7 @@ function CourseCard({ course }) {
           }}
           className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-3 rounded-xl transition-all duration-300 group-hover:shadow-lg"
         >
-          Enroll Now
+          View Details
         </Link>
       </div>
     </div>

@@ -2,19 +2,165 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getOrCreateVisitorId } from "../lib/visitor";
 import ModuleViewer from "../components/Courses/ModuleViewer";
+import { 
+  BookOpen, Clock, Award, CheckCircle, User, 
+  ArrowLeft, FileText, Calendar, Sparkles, Shield,
+  GraduationCap, Play, List, Video, FileQuestion,
+  Users, Target, TrendingUp, Zap, Star, Globe,
+  Check, ChevronRight, Menu, X, Info, Briefcase,
+  Building, Mail, Phone, MapPin, MessageCircle, AlertCircle
+} from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// ✅ FALLBACK COURSES WITH ENHANCED DATA
+const FALLBACK_COURSES = [
+  {
+    id: 1,
+    slug: "mechanic",
+    title: "Mechanic Basics",
+    description: "Learn maintenance workflow, diagnostics mindset, and safe workshop practices.",
+    level: "Beginner",
+    durationHours: 8,
+    coverImageUrl: "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWVjaGFuaWN8ZW58MHx8MHx8fDA%3D",
+    learningOutcomes: [
+      "Understand basic mechanical systems and components",
+      "Perform routine maintenance and diagnostics",
+      "Use workshop tools safely and effectively",
+      "Identify and troubleshoot common mechanical issues"
+    ],
+    courseIncludes: [
+      "Hands-on Workshop Training",
+      "Real Vehicle Practice",
+      "Placement Assistance",
+      "Industry-Recognized Certificate"
+    ],
+    courseOverview: "This comprehensive Mechanic Basics course is designed for beginners who want to build a strong foundation in mechanical systems. Through hands-on workshop training and real vehicle practice, you'll develop the skills needed to diagnose and repair common mechanical issues with confidence.",
+    targetAudience: "Ideal for school leavers, career changers, and anyone interested in starting a career in the automotive industry.",
+    careerOpportunities: ["Automotive Technician", "Workshop Assistant", "Maintenance Engineer", "Fleet Maintenance Supervisor"]
+  },
+  {
+    id: 2,
+    slug: "electrician",
+    title: "Electrician Fundamentals",
+    description: "Understand electrical safety, basic tools, wiring concepts, and safe troubleshooting approach.",
+    level: "Beginner",
+    durationHours: 8,
+    coverImageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    learningOutcomes: [
+      "Master electrical safety protocols",
+      "Understand wiring diagrams and circuits",
+      "Perform safe electrical installations",
+      "Troubleshoot common electrical faults"
+    ],
+    courseIncludes: [
+      "Safety Certification",
+      "Live Wiring Practice",
+      "Placement Assistance",
+      "Industry-Recognized Certificate"
+    ],
+    courseOverview: "The Electrician Fundamentals course provides comprehensive training in electrical safety, wiring concepts, and troubleshooting techniques. You'll gain hands-on experience with live wiring practice under expert supervision.",
+    targetAudience: "Perfect for beginners looking to enter the electrical trade or professionals wanting to formalize their skills.",
+    careerOpportunities: ["Electrician", "Electrical Technician", "Maintenance Electrician", "Construction Electrician"]
+  },
+  {
+    id: 3,
+    slug: "parlour",
+    title: "Parlour Skills",
+    description: "A structured course on skin/hair care routines, safety, and professional service standards.",
+    level: "Beginner",
+    durationHours: 6,
+    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=300&h=200&fit=crop&q=80",
+    learningOutcomes: [
+      "Master professional skin and hair care techniques",
+      "Understand hygiene and safety protocols",
+      "Develop client handling and communication skills",
+      "Learn professional service standards"
+    ],
+    courseIncludes: [
+      "Client Handling Practice",
+      "Hygiene & Care Techniques",
+      "Placement Assistance",
+      "Industry-Recognized Certificate"
+    ],
+    courseOverview: "This Parlour Skills course offers comprehensive training in professional skin and hair care, hygiene protocols, and client service standards. You'll learn through practical demonstrations and hands-on practice.",
+    targetAudience: "Ideal for those passionate about beauty and wellness, looking to start a career in the parlour industry.",
+    careerOpportunities: ["Parlour Artist", "Beauty Therapist", "Salon Manager", "Freelance Beauty Professional"]
+  },
+  {
+    id: 4,
+    slug: "salon",
+    title: "Salon Skills",
+    description: "Styling fundamentals with real client practice.",
+    level: "Beginner Friendly",
+    durationHours: 40,
+    coverImageUrl: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=80",
+    learningOutcomes: [
+      "Master fundamental styling techniques",
+      "Understand client consultation and service",
+      "Learn hygiene and safety standards",
+      "Develop professional salon skills"
+    ],
+    courseIncludes: [
+      "Styling Fundamentals",
+      "Real Client Practice",
+      "Placement Assistance",
+      "Industry-Recognized Certificate"
+    ],
+    courseOverview: "The Salon Skills course is a comprehensive program covering all aspects of professional salon services. From styling fundamentals to client consultation, you'll develop the skills needed to thrive in the beauty industry.",
+    targetAudience: "Perfect for those aspiring to become professional hairstylists or salon managers.",
+    careerOpportunities: ["Hairstylist", "Salon Manager", "Bridal Stylist", "Salon Owner"]
+  }
+];
 
 export default function CourseLearn() {
   const { slug } = useParams();
   const visitorId = useMemo(() => getOrCreateVisitorId(), []);
 
+  const [course, setCourse] = useState(null);
   const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [certificate, setcertificate] = useState(null);
+  const [courseError, setCourseError] = useState(null);
 
+  // ✅ Fetch Course Details
+  useEffect(() => {
+    const fallback = FALLBACK_COURSES.find(f => f.slug === slug);
+    if (fallback) setCourse(fallback);
+
+    fetch(`${API}/api/courses/${slug}`, {
+      headers: { "x-visitor-id": visitorId },
+    })
+      .then(async (r) => {
+        if (!r.ok) throw new Error("Course not found");
+        return r.json();
+      })
+      .then((data) => {
+        const fallbackData = FALLBACK_COURSES.find(f => f.slug === slug);
+        setCourse({
+          ...data,
+          coverImageUrl: data.coverImageUrl || fallbackData?.coverImageUrl,
+          description: data.description || fallbackData?.description,
+          level: data.level || fallbackData?.level,
+          durationHours: data.durationHours || fallbackData?.durationHours,
+          learningOutcomes: data.learningOutcomes || fallbackData?.learningOutcomes || [],
+          courseIncludes: data.courseIncludes || fallbackData?.courseIncludes || [],
+          courseOverview: data.courseOverview || fallbackData?.courseOverview || "",
+          targetAudience: data.targetAudience || fallbackData?.targetAudience || "",
+          careerOpportunities: data.careerOpportunities || fallbackData?.careerOpportunities || [],
+        });
+        setLoading(false);
+      })
+      .catch(() => {
+        if (fallback) setCourse(fallback);
+        else setCourseError("Course not found");
+        setLoading(false);
+      });
+  }, [slug, visitorId]);
+
+  // ✅ Fetch Modules (Functionality Intact)
   useEffect(() => {
     fetch(`${API}/api/courses/${slug}/modules`, {
       headers: { "x-visitor-id": visitorId },
@@ -24,6 +170,7 @@ export default function CourseLearn() {
       .catch(() => setError("Failed to load modules"));
   }, [slug, visitorId]);
 
+  // ✅ Complete Course (Functionality Intact)
   const onComplete = async () => {
     setError(null);
     setSuccess(null);
@@ -49,55 +196,227 @@ export default function CourseLearn() {
       return;
     }
 
-    setcertificate(null);
-    setSuccess("Course completed. certificate will be generated by admin.");
+    setSuccess("✅ Course completed! Certificate will be generated by admin.");
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#F2A93B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">Loading course...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (courseError || !course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md px-4">
+          <div className="text-6xl mb-4">🔍</div>
+          <h1 className="text-2xl font-bold text-[#0B2545]">Course Not Found</h1>
+          <p className="text-gray-500 mt-2">The course you're looking for doesn't exist.</p>
+          <Link to="/courses" className="mt-6 inline-block bg-[#F2A93B] hover:bg-[#e0993a] text-[#0B2545] px-6 py-3 rounded-xl font-bold transition-colors">
+            Browse All Courses
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="container mx-auto px-4 py-10">
+    <main className="container mx-auto px-4 py-8 md:py-12">
+      {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-extrabold text-[#C62828]">Learn: {slug}</h1>
-        <Link to={`/courses/${slug}`} className="text-sm font-bold text-red-700 hover:underline">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-sora font-extrabold text-[#0B2545]">
+            Learn: <span className="text-[#F2A93B]">{course.title}</span>
+          </h1>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#F2A93B]/10 text-[#0B2545] px-3 py-1 rounded-full border border-[#F2A93B]/20">
+              <Award className="w-4 h-4" />
+              {course.level || "Beginner"}
+            </span>
+            {typeof course.durationHours === "number" && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                <Clock className="w-4 h-4" />
+                {course.durationHours} hours
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+              <BookOpen className="w-4 h-4" />
+              {modules.length} modules
+            </span>
+          </div>
+        </div>
+        <Link to={`/courses/${slug}`} className="text-sm font-bold text-[#F2A93B] hover:underline flex items-center gap-1">
+          <ArrowLeft className="w-4 h-4" />
           Back to details
         </Link>
       </div>
 
+      {/* Error/Success Messages */}
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
       {success && <p className="text-green-700 font-bold mb-4">{success}</p>}
 
+      {/* Main Grid */}
       <div className="grid lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2">
-          <ModuleViewer
-            modules={modules}
-            setModules={setModules}
-            fullName={fullName}
-            setFullName={setFullName}
-          />
+        {/* Left Column - Course Details + Modules */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Course Overview */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-3">
+              <Info className="w-5 h-5 text-[#F2A93B]" />
+              Course Overview
+            </h2>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              {course.courseOverview || course.description || "This course provides comprehensive training in practical skills and industry-relevant knowledge."}
+            </p>
+          </div>
+
+          {/* What You'll Learn */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-3">
+              <GraduationCap className="w-5 h-5 text-[#F2A93B]" />
+              What you will learn
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {(course.learningOutcomes || []).map((outcome, index) => (
+                <div key={index} className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-[#F2A93B]/5 transition-colors">
+                  <Check className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" strokeWidth={3} />
+                  <span className="text-gray-700 text-sm">{outcome}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Course Includes */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-3">
+              <Zap className="w-5 h-5 text-[#F2A93B]" />
+              Course Includes
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {(course.courseIncludes || []).map((item, index) => (
+                <div key={index} className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-[#F2A93B]/5 transition-colors">
+                  <Star className="w-5 h-5 text-[#F2A93B] flex-shrink-0 mt-0.5" fill="#F2A93B" />
+                  <span className="text-gray-700 text-sm">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Target Audience */}
+          {course.targetAudience && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-3">
+                <Target className="w-5 h-5 text-[#F2A93B]" />
+                Target Audience
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">{course.targetAudience}</p>
+            </div>
+          )}
+
+          {/* Career Opportunities */}
+          {course.careerOpportunities && course.careerOpportunities.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-3">
+                <Briefcase className="w-5 h-5 text-[#F2A93B]" />
+                Career Opportunities
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {course.careerOpportunities.map((role, index) => (
+                  <span key={index} className="bg-[#F2A93B]/10 text-[#0B2545] text-xs font-medium px-3 py-1.5 rounded-full border border-[#F2A93B]/20">
+                    {role}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Module Viewer */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-3">
+              <List className="w-5 h-5 text-[#F2A93B]" />
+              Syllabus & Modules
+            </h2>
+            <ModuleViewer
+              modules={modules}
+              setModules={setModules}
+              fullName={fullName}
+              setFullName={setFullName}
+            />
+          </div>
         </div>
 
+        {/* Right Column - Complete Course */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6">
-            <h2 className="text-xl font-extrabold text-gray-900 mb-4">Complete Course</h2>
+          <div className="sticky top-24 space-y-4">
+            {/* Complete Course Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-sora font-bold text-[#0B2545] flex items-center gap-2 mb-4">
+                <CheckCircle className="w-5 h-5 text-[#F2A93B]" />
+                Complete Course
+              </h2>
 
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-            <input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your full name"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none focus:border-red-700"
-            />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                  <input
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-[#0B2545] focus:ring-2 focus:ring-[#0B2545]/20 transition bg-gray-50/50 focus:bg-white"
+                  />
+                </div>
 
-            <button
-              onClick={onComplete}
-              className="mt-4 w-full bg-[#C62828] hover:bg-[#8E0000] text-white font-bold py-2.5 rounded-md transition-colors"
-            >
-              Mark Complete & Generate certificate
-            </button>
+                <button
+                  onClick={onComplete}
+                  className="w-full bg-[#F2A93B] hover:bg-[#e0993a] text-[#0B2545] font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-[#F2A93B]/30 transform hover:-translate-y-0.5"
+                >
+                  Mark Complete & Generate Certificate
+                </button>
 
-            {/* certificate is generated by admin after completion */}
+                <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-xl">
+                  <Calendar className="w-4 h-4 inline-block mr-1 text-gray-400" />
+                  You can complete after reading modules. (Certificate will be generated by admin.)
+                </div>
+              </div>
+            </div>
 
-            <div className="mt-4 text-xs text-gray-500">
-              You can complete after reading modules. (This demo doesn’t track quiz scores.)
+            {/* Quick Stats */}
+            <div className="bg-gradient-to-br from-[#0B2545] to-[#1a3a6e] rounded-2xl p-6 text-white">
+              <h3 className="font-sora font-bold text-sm mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#F2A93B]" />
+                Course Progress
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-white/70">Modules</span>
+                  <span className="font-semibold">{modules.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/70">Status</span>
+                  <span className="font-semibold text-[#F2A93B]">
+                    {modules.length === 0 ? 'Not Started' : 'In Progress'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/70">Certificate</span>
+                  <span className="font-semibold text-[#F2A93B]">
+                    {fullName ? 'Ready' : 'Pending'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Note */}
+            <div className="bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
+              <Shield className="w-4 h-4 inline-block mr-1 text-gray-400" />
+              <span className="text-xs text-gray-500">
+                Uses visitor ID stored in your browser
+              </span>
             </div>
           </div>
         </div>
@@ -105,4 +424,3 @@ export default function CourseLearn() {
     </main>
   );
 }
-

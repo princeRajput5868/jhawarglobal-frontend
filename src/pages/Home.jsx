@@ -42,7 +42,6 @@ const FALLBACK_COURSES = [
       "Hygiene & Care Techniques",
       "Placement Assistance",
     ],
-    // ✅ PARLOUR IMAGE
     coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=500&q=80",
   },
   {
@@ -119,17 +118,8 @@ const FALLBACK_TESTIMONIALS = [
   },
 ];
 
-const UPCOMING_BATCHES = [
-  "Web Development — Batch starts July 8, 10 AM",
-  "Digital Marketing — Demo class July 6, 7 PM",
-  "Electrical Technician — Batch starts July 10, 2 PM",
-  "Tally & Accounting — Demo class July 9, 6 PM",
-  "Web Development — Online Batch July 14, 7 PM",
-];
-
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
-// ✅ FIXED: useFetch with image merge
 function useFetch(endpoint, fallback) {
   const [data, setData] = useState(fallback);
   const [loading, setLoading] = useState(true);
@@ -146,13 +136,11 @@ function useFetch(endpoint, fallback) {
           coursesData = res;
         }
         
-        // ✅ MERGE: API data + Fallback images
         if (coursesData.length > 0) {
           const mergedCourses = coursesData.map((course) => {
             const fallbackCourse = fallback.find(f => f.slug === course.slug);
             return {
               ...course,
-              // ✅ Fallback image use karo agar API mein image nahi hai
               coverImageUrl: course.coverImageUrl || fallbackCourse?.coverImageUrl,
               duration: course.duration || fallbackCourse?.duration || "",
               level: course.level || fallbackCourse?.level || "",
@@ -205,7 +193,6 @@ function useCountUp(target, duration = 1400) {
   return [value, ref];
 }
 
-// ✅ PLACEMENTS FETCH
 function useFetchPlacements() {
   const [placements, setPlacements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -242,7 +229,6 @@ function useFetchPlacements() {
   return { placements, loading };
 }
 
-// ✅ TESTIMONIALS FETCH
 function useFetchTestimonials() {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -817,24 +803,120 @@ function Hero({ courseCount }) {
   );
 }
 
-// 2. UPCOMING BATCHES TICKER
-function BatchTicker() {
-  const doubled = [...UPCOMING_BATCHES, ...UPCOMING_BATCHES];
+// ─── ABOUT SECTION (NEW - Replaces Batch Ticker) ──────────────────────────
+function AboutSection() {
   return (
-    <div className="bg-[#F2A93B] py-3 overflow-hidden border-y border-[#e0993a]/20">
-      <div className="flex gap-12 md:gap-16 animate-marquee whitespace-nowrap font-inter">
-        {doubled.map((item, i) => (
-          <span key={i} className="text-[#0B2545] text-xs sm:text-sm font-bold flex items-center gap-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#0B2545] inline-block" />
-            {item}
-          </span>
-        ))}
+    <section className="py-16 md:py-20 bg-white font-inter">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+          {/* Left - Image */}
+          <div className="relative order-2 md:order-1">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+              <img
+                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"
+                alt="About Jawahar Global Foundation"
+                className="w-full h-64 md:h-80 lg:h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/20 via-transparent to-transparent" />
+            </div>
+            
+            {/* Floating Badge */}
+            <div className="absolute -bottom-4 -right-4 bg-[#F2A93B] rounded-xl shadow-xl px-5 py-3 hidden sm:block">
+              <div className="text-center">
+                <div className="text-[#0B2545] font-sora font-extrabold text-2xl">12+</div>
+                <div className="text-[#0B2545] text-xs font-semibold">Years of Excellence</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right - Content */}
+          <div className="order-1 md:order-2">
+            <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-widest bg-[#F2A93B]/10 px-4 py-1.5 rounded-full inline-block mb-4">
+              About Us
+            </span>
+            
+            <h2 className="font-sora font-extrabold text-3xl md:text-4xl text-[#0B2545] leading-tight mb-4">
+              Empowering Lives Through <br />
+              <span className="text-[#F2A93B]">Skill Development</span>
+            </h2>
+            
+            <p className="text-slate-600 text-base leading-relaxed mb-4">
+              Jawahar Global Foundation is a premier skill development and vocational training 
+              institute dedicated to transforming lives through quality education and practical training.
+            </p>
+            
+            <p className="text-slate-600 text-base leading-relaxed mb-6">
+              We offer industry-aligned courses in <strong>Mechanic Basics, Electrician Fundamentals, 
+              Parlour Skills, Salon Skills</strong>, and more. Our mission is to bridge the skill gap 
+              and create employment opportunities for youth across India.
+            </p>
+
+            {/* Features Grid */}
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#F2A93B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-[#F2A93B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-sora font-bold text-[#0B2545] text-sm">Hands-on Training</div>
+                  <div className="text-slate-500 text-xs">Practical & industry-focused</div>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#F2A93B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-[#F2A93B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-sora font-bold text-[#0B2545] text-sm">Certified Courses</div>
+                  <div className="text-slate-500 text-xs">Government recognized</div>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#F2A93B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-[#F2A93B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-sora font-bold text-[#0B2545] text-sm">Placement Support</div>
+                  <div className="text-slate-500 text-xs">96% placement rate</div>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#F2A93B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-[#F2A93B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-sora font-bold text-[#0B2545] text-sm">12+ Centers</div>
+                  <div className="text-slate-500 text-xs">Across India</div>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              to="/about"
+              className="inline-flex items-center gap-2 text-[#F2A93B] font-bold hover:text-[#e0993a] transition-colors mt-8 group"
+            >
+              Learn more about us
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-// 3. COURSES GRID WITH SLIDER
+// ─── COURSES GRID WITH SLIDER ──────────────────────────────────
 function CoursesSection({ courses }) {
   return (
     <section className="py-20 md:py-28 bg-gray-50 font-inter">
@@ -1041,7 +1123,7 @@ export default function Home() {
   return (
     <main>
       <Hero courseCount={displayCourses.length} />
-      <BatchTicker />
+      <AboutSection />  {/* ✅ New: About Section - Replaces Batch Ticker */}
       <CoursesSection courses={displayCourses} />
       <StatsSection />
       <PlacedStudents placements={displayPlacements} />

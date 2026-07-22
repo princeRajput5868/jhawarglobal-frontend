@@ -199,7 +199,7 @@ export default function Courses() {
 
                 {/* Enroll Button */}
                 <span className="inline-flex items-center justify-center bg-[#0B2545] hover:bg-[#F2A93B] hover:text-[#0B2545] text-white text-sm font-bold py-2.5 px-4 rounded-md transition-colors duration-300 text-center">
-                  Enroll Now
+                  view Details
                 </span>
               </div>
             </Link>

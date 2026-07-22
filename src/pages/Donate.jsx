@@ -4,8 +4,134 @@ import {
   Heart, QrCode, Copy, CheckCircle, AlertCircle,
   Phone, Mail, MapPin, Clock, Shield, Award,
   Users, TrendingUp, Star, ArrowRight,
-  CreditCard, Wallet, Smartphone, Banknote
+  CreditCard, Wallet, Smartphone, Banknote,
+  X, Printer, Download
 } from "lucide-react";
+
+function generateReceiptNumber() {
+  const rand = Math.random().toString(16).slice(2, 8).toUpperCase();
+  const now = Date.now().toString().slice(-6);
+  return `JGF-DON-${now}-${rand}`;
+}
+
+function formatReceiptDate(d) {
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+/* ── Printable donation receipt slip ── */
+function DonationReceipt({ receipt, onClose }) {
+  if (!receipt) return null;
+
+  const handlePrint = () => window.print();
+
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 p-4 print:hidden-backdrop">
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #donation-receipt, #donation-receipt * { visibility: visible; }
+          #donation-receipt {
+            position: fixed; top: 0; left: 0; width: 100%;
+            margin: 0; padding: 24px;
+          }
+          #receipt-backdrop { background: none !important; position: static !important; }
+          .print\\:hidden { display: none !important; }
+          @page { size: A5; margin: 0; }
+        }
+      `}</style>
+
+      <div id="receipt-backdrop" className="w-full max-w-md">
+        <div id="donation-receipt" className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#0B2545] to-[#1a3a6e] px-6 py-6 text-center relative">
+            <button
+              onClick={onClose}
+              className="print:hidden absolute top-3 right-3 text-white/70 hover:text-white"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="w-14 h-14 mx-auto bg-white rounded-full flex items-center justify-center mb-3">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className="text-white font-sora font-extrabold text-lg">Donation Successful</h2>
+            <p className="text-slate-300 text-xs mt-1">Thank you for supporting Jawahar Global Foundation</p>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-6">
+            <div className="text-center mb-6">
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Amount Donated</p>
+              <p className="text-3xl font-sora font-extrabold text-[#C62828] mt-1">₹{receipt.amount}</p>
+            </div>
+
+            <div className="border-t border-dashed border-gray-200 pt-4 space-y-2.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Receipt No.</span>
+                <span className="font-mono font-semibold text-[#0B2545]">{receipt.receiptNo}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Date</span>
+                <span className="font-semibold text-[#0B2545]">{formatReceiptDate(receipt.date)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Donor Name</span>
+                <span className="font-semibold text-[#0B2545]">{receipt.name}</span>
+              </div>
+              {receipt.email && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Email</span>
+                  <span className="font-semibold text-[#0B2545] break-all text-right">{receipt.email}</span>
+                </div>
+              )}
+              {receipt.phone && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Phone</span>
+                  <span className="font-semibold text-[#0B2545]">{receipt.phone}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-500">Payment Method</span>
+                <span className="font-semibold text-[#0B2545]">UPI</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">UPI ID</span>
+                <span className="font-mono font-semibold text-[#0B2545]">{receipt.upiId}</span>
+              </div>
+            </div>
+
+            <div className="mt-5 bg-[#F2A93B]/10 border border-[#F2A93B]/20 rounded-xl p-3 text-center">
+              <p className="text-xs text-[#0B2545] font-medium">
+                🔒 This donation is eligible for 80G tax exemption. An official receipt will also be emailed to you.
+              </p>
+            </div>
+
+            <p className="text-center text-[11px] text-gray-400 mt-4">
+              Jawahar Global Foundation &nbsp;•&nbsp; Together For A Better Tomorrow
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="print:hidden flex gap-3 px-6 pb-6">
+            <button
+              onClick={handlePrint}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#0B2545] hover:bg-[#122f5c] text-white font-bold py-3 rounded-xl transition"
+            >
+              <Printer className="w-4 h-4" />
+              Print / Save PDF
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const Donate = () => {
   const [copied, setCopied] = useState(false);
@@ -13,6 +139,12 @@ const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [upiId] = useState("jawaharglobal@upi");
   const [donationSuccess, setDonationSuccess] = useState(false);
+  const [receipt, setReceipt] = useState(null);
+  const [formError, setFormError] = useState("");
+
+  const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
+  const [donorPhone, setDonorPhone] = useState("");
 
   const presetAmounts = [500, 1000, 2000, 5000];
 
@@ -24,13 +156,45 @@ const Donate = () => {
 
   const handleDonate = (e) => {
     e.preventDefault();
-    const amount = selectedAmount || customAmount;
+    setFormError("");
+
+    const amount = selectedAmount || Number(customAmount);
     if (!amount || amount < 1) {
-      alert("Please select or enter a donation amount");
+      setFormError("Please select or enter a donation amount.");
       return;
     }
+    if (!donorName.trim()) {
+      setFormError("Please enter your full name for the receipt.");
+      return;
+    }
+    if (!donorEmail.trim() && !donorPhone.trim()) {
+      setFormError("Please provide at least an email or phone number.");
+      return;
+    }
+
+    const newReceipt = {
+      receiptNo: generateReceiptNumber(),
+      date: new Date(),
+      amount,
+      name: donorName.trim(),
+      email: donorEmail.trim(),
+      phone: donorPhone.trim(),
+      upiId,
+    };
+
+    setReceipt(newReceipt);
     setDonationSuccess(true);
-    setTimeout(() => setDonationSuccess(false), 5000);
+  };
+
+  const closeReceipt = () => {
+    setReceipt(null);
+    setDonationSuccess(false);
+    // Reset form for next donation
+    setSelectedAmount(null);
+    setCustomAmount("");
+    setDonorName("");
+    setDonorEmail("");
+    setDonorPhone("");
   };
 
   const stats = [
@@ -122,16 +286,10 @@ const Donate = () => {
                   Choose an amount and complete your donation securely.
                 </p>
 
-                {/* Donation Success Message */}
-                {donationSuccess && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3 animate-fadeIn">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-green-700 font-semibold">Thank You for Your Donation!</p>
-                      <p className="text-green-600 text-sm">
-                        Your support helps us continue our mission. You will receive a confirmation email shortly.
-                      </p>
-                    </div>
+                {formError && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-red-700 text-sm font-medium">{formError}</p>
                   </div>
                 )}
 
@@ -179,6 +337,46 @@ const Donate = () => {
                           setSelectedAmount(null);
                         }}
                         className="w-full border border-gray-300 rounded-xl px-10 py-3 outline-none focus:border-[#C62828] focus:ring-2 focus:ring-[#C62828]/20 transition bg-gray-50/50 focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Donor Details — needed to generate the receipt */}
+                  <div className="mb-6 grid sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Your full name"
+                        value={donorName}
+                        onChange={(e) => setDonorName(e.target.value)}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-[#C62828] focus:ring-2 focus:ring-[#C62828]/20 transition bg-gray-50/50 focus:bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="you@example.com"
+                        value={donorEmail}
+                        onChange={(e) => setDonorEmail(e.target.value)}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-[#C62828] focus:ring-2 focus:ring-[#C62828]/20 transition bg-gray-50/50 focus:bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="+91 98765 43210"
+                        value={donorPhone}
+                        onChange={(e) => setDonorPhone(e.target.value)}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-[#C62828] focus:ring-2 focus:ring-[#C62828]/20 transition bg-gray-50/50 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -366,6 +564,11 @@ const Donate = () => {
           </Link>
         </div>
       </section>
+
+      {/* Donation Receipt Slip — shown after a successful donation */}
+      {donationSuccess && receipt && (
+        <DonationReceipt receipt={receipt} onClose={closeReceipt} />
+      )}
 
       {/* CSS Animation */}
       <style>{`

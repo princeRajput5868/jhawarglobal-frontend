@@ -34,7 +34,7 @@ const FALLBACK_COURSES = [
       "Live Wiring Practice",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1581092919535-7146e8b8aa3f?w=1200&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRb-Lf33ysvK2w_tiiToW6GADSoKiayVCaSkW3Pg5AZw&s=10",
   },
   {
     id: 3,

@@ -22,7 +22,7 @@ const FALLBACK_COURSES = [
     description: "Learn maintenance workflow, diagnostics mindset, and safe workshop practices.",
     level: "Beginner",
     durationHours: 8,
-    coverImageUrl: "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWVjaGFuaWN8ZW58MHx8MHx8fDA%3D",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4b6-0o8pA67yqN01wHdB2Aaza7uQ_jhKnGj2srDNKxw&s=10",
     learningOutcomes: [
       "Understand basic mechanical systems and components",
       "Perform routine maintenance and diagnostics",
@@ -46,7 +46,7 @@ const FALLBACK_COURSES = [
     description: "Understand electrical safety, basic tools, wiring concepts, and safe troubleshooting approach.",
     level: "Beginner",
     durationHours: 8,
-    coverImageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRb-Lf33ysvK2w_tiiToW6GADSoKiayVCaSkW3Pg5AZw&s=10",
     learningOutcomes: [
       "Master electrical safety protocols",
       "Understand wiring diagrams and circuits",
@@ -70,7 +70,7 @@ const FALLBACK_COURSES = [
     description: "A structured course on skin/hair care routines, safety, and professional service standards.",
     level: "Beginner",
     durationHours: 6,
-    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=300&h=200&fit=crop&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLmnKwaw_1rXlLd2DVYbAh6G1FsgXhnpUjRWFVseNJAQ&s=10",
     learningOutcomes: [
       "Master professional skin and hair care techniques",
       "Understand hygiene and safety protocols",
@@ -94,7 +94,7 @@ const FALLBACK_COURSES = [
     description: "Styling fundamentals with real client practice.",
     level: "Beginner Friendly",
     durationHours: 40,
-    coverImageUrl: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgPtalOPAGP1lZ8O5GTBrt8NrjKBnjjKhuHGjvuf-opg&s=10",
     learningOutcomes: [
       "Master fundamental styling techniques",
       "Understand client consultation and service",

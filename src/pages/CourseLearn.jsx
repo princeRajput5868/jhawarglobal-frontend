@@ -160,7 +160,7 @@ export default function CourseLearn() {
       });
   }, [slug, visitorId]);
 
-  // ✅ Fetch Modules (Functionality Intact)
+  // ✅ Fetch Modules
   useEffect(() => {
     fetch(`${API}/api/courses/${slug}/modules`, {
       headers: { "x-visitor-id": visitorId },
@@ -170,7 +170,7 @@ export default function CourseLearn() {
       .catch(() => setError("Failed to load modules"));
   }, [slug, visitorId]);
 
-  // ✅ Complete Course (Functionality Intact)
+  // ✅ Complete Course
   const onComplete = async () => {
     setError(null);
     setSuccess(null);
@@ -250,10 +250,10 @@ export default function CourseLearn() {
             </span>
           </div>
         </div>
-       <Link to="/courses" className="text-sm font-bold text-[#F2A93B] hover:underline flex items-center gap-1">
-  <ArrowLeft className="w-4 h-4" />
-  Back to Courses
-</Link>
+        <Link to="/courses" className="text-sm font-bold text-[#F2A93B] hover:underline flex items-center gap-1">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Courses
+        </Link>
       </div>
 
       {/* Error/Success Messages */}

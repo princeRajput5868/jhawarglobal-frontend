@@ -43,7 +43,6 @@ const FALLBACK_COURSES = [
       "Hygiene & Care Techniques",
       "Placement Assistance",
     ],
-    // ✅ NEW IMAGE FOR PARLOUR SKILLS
     coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLmnKwaw_1rXlLd2DVYbAh6G1FsgXhnpUjRWFVseNJAQ&s=10",
   },
   {
@@ -143,7 +142,7 @@ export default function Courses() {
           </div>
         )}
 
-        {/* Course Grid - Home Page Style */}
+        {/* Course Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {filteredCourses.map((course) => (
             <Link

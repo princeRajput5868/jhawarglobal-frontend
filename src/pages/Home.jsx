@@ -21,7 +21,7 @@ const FALLBACK_COURSES = [
       "Real Vehicle Practice",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1504222490345-c075b6008014?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWVjaGFuaWN8ZW58MHx8MHx8fDA%3D",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4b6-0o8pA67yqN01wHdB2Aaza7uQ_jhKnGj2srDNKxw&s=10",
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ const FALLBACK_COURSES = [
       "Live Wiring Practice",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80",
+    coverImageUrl: "https://images.unsplash.com/photo-1581092919535-7146e8b8aa3f?w=1200&q=80",
   },
   {
     id: 3,
@@ -47,7 +47,7 @@ const FALLBACK_COURSES = [
       "Hygiene & Care Techniques",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=500&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLmnKwaw_1rXlLd2DVYbAh6G1FsgXhnpUjRWFVseNJAQ&s=10",
   },
   {
     id: 4,
@@ -60,7 +60,7 @@ const FALLBACK_COURSES = [
       "Real Client Practice",
       "Placement Assistance",
     ],
-    coverImageUrl: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=80",
+    coverImageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgPtalOPAGP1lZ8O5GTBrt8NrjKBnjjKhuHGjvuf-opg&s=10",
   },
 ];
 

@@ -42,7 +42,7 @@ export default function Contact() {
         setForm({ name: "", email: "", phone: "", message: "", subject: "" });
         
         // ✅ WhatsApp Message - Admin ko notify karega
-        const adminWhatsApp = "918170848420"; // Admin WhatsApp Number
+        const adminWhatsApp = "917838489517"; // Admin WhatsApp Number
         const messageText = `New Contact Form Submission%0A%0A📌 Name: ${form.name}%0A📧 Email: ${form.email}%0A📱 Phone: ${form.phone || 'N/A'}%0A📝 Subject: ${form.subject || 'N/A'}%0A💬 Message: ${form.message}`;
         window.open(`https://wa.me/${adminWhatsApp}?text=${messageText}`, '_blank');
         
@@ -253,7 +253,7 @@ export default function Contact() {
 
                     {/* WhatsApp Button - Direct Chat */}
                     <a
-                      href="https://wa.me/918170848420"
+                      href="https://wa.me/91783-848-9517"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-[#25D366]/30 group"
@@ -375,7 +375,7 @@ export default function Contact() {
                   Get instant support from our team via WhatsApp.
                 </p>
                 <a
-                  href="https://wa.me/918170848420"
+                  href="https://wa.me/91783-848-9517"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-[#25D366]/30 group"

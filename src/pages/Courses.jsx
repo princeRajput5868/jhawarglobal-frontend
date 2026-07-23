@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getOrCreateVisitorId } from "../lib/visitor";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "https://jhawarglobal-backend.onrender.com";
 
 // ✅ FALLBACK COURSES WITH CORRECT IMAGES
 const FALLBACK_COURSES = [

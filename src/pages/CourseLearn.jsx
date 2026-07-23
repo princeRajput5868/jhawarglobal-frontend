@@ -11,7 +11,7 @@ import {
   Building, Mail, Phone, MapPin, MessageCircle, AlertCircle
 } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "https://jhawarglobal-backend.onrender.com";
 
 // ✅ FALLBACK COURSES WITH ENHANCED DATA
 const FALLBACK_COURSES = [

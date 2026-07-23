@@ -10,7 +10,7 @@ import directorSignature from "../../assets/signatures/director-signature.png";
 import studyCenterSignature from "../../assets/signatures/studycenter-signature.png";
 import { adminApi } from "../../lib/adminApi";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "https://jhawarglobal-backend.onrender.com";
 
 // ── QR Code Component ──
 function QRCodeComponent({ value }) {

@@ -12,7 +12,7 @@ import {
 
 import { getOrCreateVisitorId } from "../lib/visitor";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "https://jhawarglobal-backend.onrender.com";
 
 const Header = () => {
   const navigate = useNavigate();

@@ -8,7 +8,7 @@ import {
   Shield, Heart, ExternalLink, Play, Image
 } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "https://jhawarglobal-backend.onrender.com";
 
 // ✅ HOME PAGE SE EXACT IMAGES (SAME AS ABOUT PAGE)
 const FALLBACK_COURSES = [

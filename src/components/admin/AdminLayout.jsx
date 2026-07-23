@@ -16,7 +16,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: "certificates",
+    label: "Diplomas", // ✅ Changed from "certificates"
     to: "/admin/certificates",
     match: (p) => p.startsWith("/admin/certificates"),
     icon: (
@@ -29,12 +29,22 @@ const NAV_ITEMS = [
   },
   {
     label: "Courses",
-    to: "/admin",
-    match: () => false,
+    to: "/admin/courses",
+    match: (p) => p.startsWith("/admin/courses"),
     icon: (
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    label: "Settings",
+    to: "/admin/settings",
+    match: (p) => p.startsWith("/admin/settings"),
+    icon: (
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },

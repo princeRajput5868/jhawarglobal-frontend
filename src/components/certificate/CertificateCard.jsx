@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import isoLogo from "../../assets/logos/iso.jpg";
 import certifiedLogo from "../../assets/logos/certified.jpg";
 import guaranteeLogo from "../../assets/logos/gurantee.jpg";
@@ -11,8 +12,8 @@ import { adminApi } from "../../lib/adminApi";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-/* ── QR placeholder ── */
-function QRPlaceholder({ value }) {
+// ── QR Code Component ──
+function QRCodeComponent({ value }) {
   return (
     <div
       style={{
@@ -24,39 +25,23 @@ function QRPlaceholder({ value }) {
         alignItems: "center",
         justifyContent: "center",
         background: "#fff",
-        padding: 3,
+        padding: 5,
         flexShrink: 0,
       }}
     >
-      <svg viewBox="0 0 21 21" width="76" height="76" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="1" width="7" height="7" fill="none" stroke="#000" strokeWidth="1" />
-        <rect x="2.5" y="2.5" width="4" height="4" fill="#000" />
-        <rect x="13" y="1" width="7" height="7" fill="none" stroke="#000" strokeWidth="1" />
-        <rect x="14.5" y="2.5" width="4" height="4" fill="#000" />
-        <rect x="1" y="13" width="7" height="7" fill="none" stroke="#000" strokeWidth="1" />
-        <rect x="2.5" y="14.5" width="4" height="4" fill="#000" />
-        <rect x="10" y="1" width="1.5" height="1.5" fill="#000" />
-        <rect x="10" y="3.5" width="1.5" height="1.5" fill="#000" />
-        <rect x="10" y="6" width="1.5" height="1.5" fill="#000" />
-        <rect x="1" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="3.5" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="6" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="10" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="12.5" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="15" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="17.5" y="10" width="1.5" height="1.5" fill="#000" />
-        <rect x="10" y="12.5" width="1.5" height="1.5" fill="#000" />
-        <rect x="12.5" y="12.5" width="1.5" height="1.5" fill="#000" />
-        <rect x="15" y="15" width="1.5" height="1.5" fill="#000" />
-        <rect x="17.5" y="17.5" width="1.5" height="1.5" fill="#000" />
-        <rect x="10" y="17.5" width="1.5" height="1.5" fill="#000" />
-        <rect x="12.5" y="17.5" width="1.5" height="1.5" fill="#000" />
-      </svg>
+      <QRCodeSVG
+        value={value}
+        size={78}
+        bgColor="#ffffff"
+        fgColor="#14306b"
+        level="L"
+        includeMargin={false}
+      />
     </div>
   );
 }
 
-/* ── Small compact certified badge ── */
+// ── ISO Certified Badge ──
 function CertifiedBadge() {
   return (
     <div
@@ -105,6 +90,7 @@ function RegistrationBadge() {
   );
 }
 
+// ── Skill India Badge ──
 function SkillBadge() {
   return (
     <div
@@ -131,7 +117,7 @@ function SkillBadge() {
   );
 }
 
-/* ── Folded ribbon corner decoration ── */
+// ── Folded ribbon corner decoration ──
 function CornerRibbon({ corner }) {
   const rotations = {
     "top-left": 0,
@@ -230,28 +216,40 @@ const tiledPatternUrl =
   `);
 
 export default function CertificateCard({ certificate, qrValue, printId = "certificate-print" }) {
-  const [certificateName, setCertificateName] = useState("Diploma");
+  const [certificateName, setCertificateName] = useState("Certificate");
 
-  // ✅ Fetch certificate name from settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+        // ✅ First check if certificate has type in meta
+        if (certificate?.meta?.certificateType) {
+          const type = certificate.meta.certificateType;
+          setCertificateName(type === 'diploma' ? 'Diploma' : 'Certificate');
+          return;
+        }
+        
+        // ✅ If not in meta, fetch from settings
         const res = await adminApi.get("/api/admin/settings");
         const data = res.data;
-        setCertificateName(data.certificate_name || "Diploma");
+        setCertificateName(data.certificate_name || "Certificate");
       } catch (error) {
         console.error("Failed to fetch settings:", error);
-        setCertificateName("Diploma");
+        // ✅ Use certificate type from meta if available
+        if (certificate?.meta?.certificateType) {
+          const type = certificate.meta.certificateType;
+          setCertificateName(type === 'diploma' ? 'Diploma' : 'Certificate');
+        } else {
+          setCertificateName("Certificate");
+        }
       }
     };
     fetchSettings();
-  }, []);
+  }, [certificate]);
 
   if (!certificate) return null;
 
   const meta = certificate.meta || {};
 
-  // ✅ FIX: Properly resolve photo URL
   let photoUrl = null;
   if (meta?.photoUrl) {
     const raw = String(meta.photoUrl).trim();
@@ -262,7 +260,6 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
     } else if (raw.startsWith('uploads/')) {
       photoUrl = `${API}/${raw}`;
     } else {
-      // Try to construct URL
       photoUrl = `${API}/uploads/certificates/${raw.split('/').pop()}`;
     }
   } else if (certificate?.photoUrl) {
@@ -276,10 +273,10 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
     }
   }
 
-  console.log("📸 Photo URL resolved:", photoUrl);
+  // ✅ QR Code value - Full URL with certificate ID
+  const qrCodeUrl = `${window.location.origin}/certificates/${certificate.id}`;
 
   const courseTitle = meta?.courseTitle || certificate?.courseTitle || certificate?.courseSlug || "—";
-
   const guardianRelation = meta?.guardianRelation || "S/O";
   const guardianName = meta?.guardianName || "—";
   const dob = meta?.dob ? formatDate(meta.dob) : "—";
@@ -289,7 +286,6 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
   const branchCode = meta?.branchCode || "—";
   const place = meta?.place || "—";
   const signatoryName = meta?.signatoryName || "Jawahar Global Foundation";
-
   const issuedDate = certificate?.issuedAt ? formatDate(certificate?.issuedAt) : "—";
 
   return (
@@ -434,8 +430,8 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
             {/* LEFT COLUMN - Badges */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, width: 100, flexShrink: 0 }}>
               <RegistrationBadge />
-              <CertifiedBadge />
               <SkillBadge />
+              <CertifiedBadge />
             </div>
 
             {/* CENTER COLUMN - Certificate Text */}
@@ -531,9 +527,18 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
               </div>
             </div>
 
-            {/* RIGHT COLUMN - Photo + QR - FIXED */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 100, flexShrink: 0, gap: 10 }}>
-              {/* ✅ Student Photo - FIXED */}
+            {/* RIGHT COLUMN - Photo + QR */}
+            <div style={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "center", 
+              width: 100, 
+              flexShrink: 0, 
+              gap: 10,
+              justifyContent: "flex-start",
+              paddingTop: 0,
+            }}>
+              {/* Student Photo */}
               {photoUrl ? (
                 <div
                   style={{
@@ -586,8 +591,10 @@ export default function CertificateCard({ certificate, qrValue, printId = "certi
                 </div>
               )}
 
-              {/* QR Code */}
-              <QRPlaceholder value={qrValue} />
+              {/* ✅ QR Code - Real QR Code */}
+              <div style={{ marginTop: 80 }}>
+                <QRCodeComponent value={qrCodeUrl} />
+              </div>
             </div>
           </div>
 

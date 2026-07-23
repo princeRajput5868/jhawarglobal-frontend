@@ -7,7 +7,7 @@ import {
   Calendar, BookOpen, Award, FileText, ChevronLeft, 
   ChevronRight, X, Loader2, CheckCircle, AlertCircle,
   UserPlus, GraduationCap, Building, Phone, MapPin,
-  RefreshCw, Filter, Download, Edit
+  RefreshCw, Filter, Download, Edit, FileCheck, ClipboardCheck, Settings
 } from "lucide-react";
 
 export default function AdminCertificates() {
@@ -18,6 +18,9 @@ export default function AdminCertificates() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  const [certificateType, setCertificateType] = useState("certificate");
 
   const [create, setCreate] = useState({
     visitorId: "",
@@ -66,11 +69,52 @@ export default function AdminCertificates() {
     visitorId: "",
     from: "",
     to: "",
-    limit: 25,
+    limit: "25",
     page: 1,
   });
 
   const [showEnrollmentLookup, setShowEnrollmentLookup] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await adminApi.get("/api/admin/settings");
+        const data = res.data;
+        if (data.certificate_name) {
+          const type = data.certificate_name.toLowerCase();
+          if (type === "diploma" || type === "certificate") {
+            setCertificateType(type);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const saveTypeToSettings = async (type) => {
+    setSavingSettings(true);
+    try {
+      await adminApi.put("/api/admin/settings/certificate_name", { 
+        value: type === 'diploma' ? 'Diploma' : 'Certificate' 
+      });
+      console.log(`✅ Settings updated to: ${type}`);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      setErr("Failed to save type to settings. Please try again.");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleTypeChange = async (type) => {
+    setCertificateType(type);
+    await saveTypeToSettings(type);
+    const typeLabel = type === 'diploma' ? 'Diploma' : 'Certificate';
+    setNotice(`✅ Switched to ${typeLabel}. Settings updated automatically.`);
+    setTimeout(() => setNotice(null), 3000);
+  };
 
   const createCertificate = async (e) => {
     e.preventDefault();
@@ -90,6 +134,7 @@ export default function AdminCertificates() {
         enrollmentNo: create.enrollmentNo,
         branchCode: create.branchCode,
         place: create.place,
+        certificateType: certificateType,
       };
 
       const formData = new FormData();
@@ -106,7 +151,9 @@ export default function AdminCertificates() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setNotice("Certificate created successfully.");
+      const typeLabel = certificateType === 'diploma' ? 'Diploma' : 'Certificate';
+      setNotice(`✅ ${typeLabel} created successfully!`);
+      
       setCreate({
         visitorId: "",
         enrollmentNumber: "",
@@ -191,8 +238,11 @@ export default function AdminCertificates() {
     if (f.visitorId) params.set("visitorId", f.visitorId);
     if (f.from) params.set("from", f.from);
     if (f.to) params.set("to", f.to);
-    if (f.limit) params.set("limit", String(f.limit));
-    if (f.page) params.set("page", String(f.page));
+    
+    if (f.limit && f.limit !== "all") {
+      params.set("limit", String(f.limit));
+    }
+    params.set("page", String(f.page || 1));
     return params;
   };
 
@@ -232,14 +282,15 @@ export default function AdminCertificates() {
   };
 
   const onDelete = async (cert) => {
-    const ok = window.confirm(`Delete certificate #${cert.certificateNumber} for "${cert.fullName}"? This can't be undone.`);
+    const typeLabel = certificateType === 'diploma' ? 'Diploma' : 'Certificate';
+    const ok = window.confirm(`Delete ${typeLabel} #${cert.certificateNumber} for "${cert.fullName}"? This can't be undone.`);
     if (!ok) return;
 
     setDeletingId(cert.id);
     setErr(null);
     try {
       await adminApi.delete(`/api/admin/certificates/${cert.id}`);
-      setNotice("Certificate deleted successfully.");
+      setNotice(`${typeLabel} deleted successfully.`);
       fetchList(filters);
     } catch (e) {
       setErr(e?.response?.data?.message || "Failed to delete certificate");
@@ -248,18 +299,85 @@ export default function AdminCertificates() {
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(total / (filters.limit || 25)));
+  const totalPages = filters.limit === "all" 
+    ? 1 
+    : Math.max(1, Math.ceil(total / (Number(filters.limit) || 25)));
+
+  const typeLabel = certificateType === 'diploma' ? 'Diploma' : 'Certificate';
+  const typeLabelLower = certificateType === 'diploma' ? 'diploma' : 'certificate';
 
   return (
     <AdminLayout
-      title="Certificates"
-      subtitle="Search, edit and manage issued certificates"
+      title={`${typeLabel}s`}
+      subtitle={`Search, edit and manage issued ${typeLabelLower}s`}
       actions={
         <span className="text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
           {total} total
         </span>
       }
     >
+      {/* Certificate/Diploma Toggle Buttons */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Type:</span>
+              <div className="flex bg-gray-100 rounded-xl p-1">
+                <button
+                  onClick={() => handleTypeChange("certificate")}
+                  disabled={savingSettings}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
+                    certificateType === "certificate"
+                      ? "bg-[#7B1C1C] text-white shadow-lg"
+                      : "text-gray-600 hover:text-[#7B1C1C]"
+                  } ${savingSettings ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <FileCheck className="w-4 h-4" />
+                  Certificate
+                </button>
+                <button
+                  onClick={() => handleTypeChange("diploma")}
+                  disabled={savingSettings}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
+                    certificateType === "diploma"
+                      ? "bg-[#7B1C1C] text-white shadow-lg"
+                      : "text-gray-600 hover:text-[#7B1C1C]"
+                  } ${savingSettings ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <ClipboardCheck className="w-4 h-4" />
+                  Diploma
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {savingSettings && (
+                <span className="flex items-center gap-2 text-xs text-gray-500">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving...
+                </span>
+              )}
+              <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                certificateType === 'diploma' 
+                  ? 'bg-purple-100 text-purple-700' 
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
+                Currently: {typeLabel}
+              </span>
+              <Link
+                to="/admin/settings"
+                className="text-gray-400 hover:text-[#7B1C1C] transition p-1.5 rounded-lg hover:bg-gray-100"
+                title="Change in Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            ⚡ Changes are automatically saved to Settings
+          </p>
+        </div>
+      </div>
+
       {/* Create Certificate Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
@@ -268,8 +386,8 @@ export default function AdminCertificates() {
               <Plus className="w-5 h-5 text-[#7B1C1C]" />
             </div>
             <div>
-              <h3 className="font-sora font-bold text-gray-800 text-sm">Create Certificate</h3>
-              <p className="text-xs text-gray-500">Generate certificate for student. Same student + course will update existing certificate.</p>
+              <h3 className="font-sora font-bold text-gray-800 text-sm">Create {typeLabel}</h3>
+              <p className="text-xs text-gray-500">Generate {typeLabelLower} for student. Same student + course will update existing {typeLabelLower}.</p>
             </div>
           </div>
           <button
@@ -297,7 +415,7 @@ export default function AdminCertificates() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {/* Form fields - same as before */}
+            {/* Full Name */}
             <div>
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
                 <User className="w-3.5 h-3.5" />
@@ -511,7 +629,7 @@ export default function AdminCertificates() {
               ) : (
                 <>
                   <Plus className="w-4 h-4" />
-                  Create Certificate
+                  Create {typeLabel}
                 </>
               )}
             </button>
@@ -519,7 +637,7 @@ export default function AdminCertificates() {
         </form>
       </div>
 
-      {/* Enrollment Lookup - Collapsible */}
+      {/* Enrollment Lookup */}
       {showEnrollmentLookup && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6 animate-fadeIn">
           <div className="p-5 border-b border-gray-100 flex items-center justify-between">
@@ -661,90 +779,117 @@ export default function AdminCertificates() {
         </div>
       )}
 
-      {/* Search Filters */}
+      {/* ✅ SEARCH FILTERS - 2 ROW LAYOUT */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div className="p-5">
-          <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
-                <Search className="w-3.5 h-3.5" />
-                Search
-              </label>
-              <input
-                value={filters.q}
-                onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
-                placeholder="Search by ID, name, slug..."
-              />
+          <form onSubmit={onSubmit}>
+            {/* Row 1: Search, Course Slug, Full Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                  <Search className="w-3.5 h-3.5" />
+                  Search
+                </label>
+                <input
+                  value={filters.q}
+                  onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
+                  placeholder="Search by ID, name, slug..."
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Course Slug</label>
+                <input
+                  value={filters.courseSlug}
+                  onChange={(e) => setFilters((f) => ({ ...f, courseSlug: e.target.value }))}
+                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
+                  placeholder="e.g. mechanic"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Full Name</label>
+                <input
+                  value={filters.fullName}
+                  onChange={(e) => setFilters((f) => ({ ...f, fullName: e.target.value }))}
+                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
+                  placeholder="Student name"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Course Slug</label>
-              <input
-                value={filters.courseSlug}
-                onChange={(e) => setFilters((f) => ({ ...f, courseSlug: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
-                placeholder="e.g. mechanic"
-              />
-            </div>
+            {/* Row 2: Show Dropdown, From, To, Search Button */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* ✅ SHOW DROPDOWN */}
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5" />
+                  Show
+                </label>
+                <select
+                  value={filters.limit}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFilters((f) => ({ ...f, limit: val, page: 1 }));
+                  }}
+                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition bg-white"
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
 
-            <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Full Name</label>
-              <input
-                value={filters.fullName}
-                onChange={(e) => setFilters((f) => ({ ...f, fullName: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
-                placeholder="Student name"
-              />
-            </div>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  From
+                </label>
+                <input
+                  type="date"
+                  value={filters.from}
+                  onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
+                />
+              </div>
 
-            <div className="flex items-end">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#7B1C1C] hover:bg-[#5f1515] text-white font-bold py-2.5 rounded-xl text-sm transition-all duration-300 disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg hover:shadow-[#7B1C1C]/30"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Filter className="w-4 h-4" />
-                    Search
-                  </>
-                )}
-              </button>
+              <div>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  To
+                </label>
+                <input
+                  type="date"
+                  value={filters.to}
+                  onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
+                />
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#7B1C1C] hover:bg-[#5f1515] text-white font-bold py-2.5 rounded-xl text-sm transition-all duration-300 disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg hover:shadow-[#7B1C1C]/30"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Filter className="w-4 h-4" />
+                      Search
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                From
-              </label>
-              <input
-                type="date"
-                value={filters.from}
-                onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                To
-              </label>
-              <input
-                type="date"
-                value={filters.to}
-                onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7B1C1C]/20 focus:border-[#7B1C1C] transition"
-              />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -756,8 +901,8 @@ export default function AdminCertificates() {
               <Award className="w-5 h-5 text-[#7B1C1C]" />
             </div>
             <div>
-              <h3 className="font-sora font-bold text-gray-800 text-sm">Issued Certificates</h3>
-              <p className="text-xs text-gray-500">{total} certificates found</p>
+              <h3 className="font-sora font-bold text-gray-800 text-sm">Issued {typeLabel}s</h3>
+              <p className="text-xs text-gray-500">{total} {typeLabelLower}s found</p>
             </div>
           </div>
           <button
@@ -773,7 +918,7 @@ export default function AdminCertificates() {
             <thead className="bg-gray-50">
               <tr className="text-left">
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Photo</th>
-                <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Certificate #</th>
+                <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">{typeLabel} #</th>
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Name</th>
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Course</th>
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Issued</th>
@@ -786,7 +931,7 @@ export default function AdminCertificates() {
                   <td colSpan={6} className="p-8 text-center">
                     <div className="flex items-center justify-center gap-3">
                       <Loader2 className="w-5 h-5 animate-spin text-[#7B1C1C]" />
-                      <span className="text-gray-500">Loading certificates...</span>
+                      <span className="text-gray-500">Loading {typeLabelLower}s...</span>
                     </div>
                   </td>
                 </tr>
@@ -795,8 +940,8 @@ export default function AdminCertificates() {
                   <td colSpan={6} className="p-8 text-center">
                     <div className="text-gray-500">
                       <Award className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-                      <p>No certificates found</p>
-                      <p className="text-xs text-gray-400 mt-1">Create your first certificate to get started</p>
+                      <p>No {typeLabelLower}s found</p>
+                      <p className="text-xs text-gray-400 mt-1">Create your first {typeLabelLower} to get started</p>
                     </div>
                   </td>
                 </tr>
@@ -822,7 +967,6 @@ export default function AdminCertificates() {
                       <td className="p-4 text-gray-500 text-xs">{c.issuedAt ? new Date(c.issuedAt).toLocaleDateString() : "-"}</td>
                       <td className="p-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
-                          {/* ✅ EDIT BUTTON - AB YAHAN HAI */}
                           <Link
                             to={`/admin/certificates/${c.id}/edit`}
                             className="inline-flex items-center gap-1.5 text-blue-600 font-semibold text-xs hover:underline transition-colors"
@@ -863,12 +1007,12 @@ export default function AdminCertificates() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {!loading && items.length > 0 && (
+        {/* Pagination - Show only if not "All" */}
+        {!loading && items.length > 0 && filters.limit !== "all" && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-100">
             <span className="text-sm text-gray-500">
               Showing <span className="font-semibold text-gray-700">{items.length}</span> of{' '}
-              <span className="font-semibold text-gray-700">{total}</span> certificates
+              <span className="font-semibold text-gray-700">{total}</span> {typeLabelLower}s
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -893,9 +1037,17 @@ export default function AdminCertificates() {
             </div>
           </div>
         )}
+
+        {/* Show "All" message */}
+        {!loading && items.length > 0 && filters.limit === "all" && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-100">
+            <span className="text-sm text-gray-500">
+              Showing <span className="font-semibold text-gray-700">All</span> {total} {typeLabelLower}s
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* CSS Animation */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }

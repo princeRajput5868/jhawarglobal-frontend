@@ -32,6 +32,8 @@ import AdminPlacementForm from "./pages/admin/AdminPlacementForm";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminTestimonialForm from "./pages/admin/AdminTestimonialForm";
 import AdminSettings from "./pages/admin/AdminSettings";
+import QRScanner from "./components/QRScanner";
+
 
 function App() {
   const location = useLocation();
@@ -104,6 +106,9 @@ function App() {
 
         {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/" replace />} />
+
+
+<Route path="/scan-qr" element={<QRScanner />} />
       </Routes>
 
       {!isAdminRoute && <Footer />}

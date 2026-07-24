@@ -710,6 +710,7 @@ function PlacedStudents({ placements }) {
 // ─── SECTIONS ───────────────────────────────────────────────────────────────
 
 // ✅ 1. HERO - Badges Inside Image, 3 Logos Below
+// ✅ 1. HERO - Logos at Top-Left, Badges Inside Image
 function Hero({ courseCount }) {
   return (
     <section className="relative min-h-screen flex items-center bg-[#0B2545] overflow-hidden font-inter">
@@ -720,10 +721,32 @@ function Hero({ courseCount }) {
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-[#F2A93B]/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-28 w-full">
+      <div className="relative max-w-7xl mx-auto px-4 pt-8 pb-20 md:pt-12 md:pb-28 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left - Content */}
           <div className="text-center lg:text-left">
+            {/* ✅ 3 LOGOS - Top Left, Above Badge */}
+            <div className="flex items-center gap-4 justify-center lg:justify-start mb-3">
+              <img
+                src={msmeLogo}
+                alt="MSME"
+                className="h-14 w-auto object-contain bg-white rounded-md p-1"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <img
+                src={isoLogo}
+                alt="ISO Certified"
+                className="h-14 w-auto object-contain bg-white rounded-md p-1"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <img
+                src={skillLogo}
+                alt="Skill India"
+                className="h-14 w-auto object-contain bg-white rounded-md p-1"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+
             <div className="inline-flex items-center gap-2 bg-[#F2A93B]/10 border border-[#F2A93B]/20 rounded-full px-4 py-1.5 mb-6">
               <span className="w-2 h-2 bg-[#F2A93B] rounded-full animate-pulse" />
               <span className="text-[#F2A93B] text-xs font-bold uppercase tracking-wider">
@@ -785,7 +808,7 @@ function Hero({ courseCount }) {
                 className="w-full h-80 lg:h-96 object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/50 via-transparent to-transparent" />
-              
+
               {/* ✅ "100% Practical Training" Badge - Inside Image Top Right */}
               <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl px-4 py-3">
                 <div className="text-center">
@@ -805,53 +828,12 @@ function Hero({ courseCount }) {
                 </div>
               </div>
             </div>
-
-            {/* ✅ 3 LOGOS Below Image - Only Logos, No Badges */}
-            <div className="mt-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl px-6 py-4 flex items-center justify-center gap-8 border border-white/20">
-              {/* MSME Logo */}
-              <div className="flex flex-col items-center">
-                <img 
-                  src={msmeLogo} 
-                  alt="MSME" 
-                  className="h-12 w-auto object-contain"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-                <span className="text-[8px] text-gray-400 font-bold mt-1 uppercase">MSME</span>
-              </div>
-              
-              <div className="w-px h-12 bg-gray-200" />
-              
-              {/* ISO Logo */}
-              <div className="flex flex-col items-center">
-                <img 
-                  src={isoLogo} 
-                  alt="ISO Certified" 
-                  className="h-12 w-auto object-contain"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-                <span className="text-[8px] text-gray-400 font-bold mt-1 uppercase">ISO 9001:2015</span>
-              </div>
-              
-              <div className="w-px h-12 bg-gray-200" />
-              
-              {/* Skill India Logo */}
-              <div className="flex flex-col items-center">
-                <img 
-                  src={skillLogo} 
-                  alt="Skill India" 
-                  className="h-12 w-auto object-contain"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-                <span className="text-[8px] text-gray-400 font-bold mt-1 uppercase">Skill India</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </section>
   );
 }
-
 // ─── ABOUT SECTION ────────────────────────────────────────────────
 function AboutSection() {
   return (

@@ -33,6 +33,7 @@ import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminTestimonialForm from "./pages/admin/AdminTestimonialForm";
 import AdminSettings from "./pages/admin/AdminSettings";
 import QRScanner from "./components/QRScanner";
+import AdminCertificatesNew from "./pages/admin/AdminCertificatesNew";
 
 
 function App() {
@@ -109,6 +110,9 @@ function App() {
 
 
 <Route path="/scan-qr" element={<QRScanner />} />
+
+{/* // Add this route */}
+<Route path="/admin/certificates-new" element={<AdminCertificatesNew />} />
       </Routes>
 
       {!isAdminRoute && <Footer />}

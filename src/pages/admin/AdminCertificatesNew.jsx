@@ -10,7 +10,7 @@ import {
   RefreshCw, Filter, Download, Edit, FileCheck, ClipboardCheck, Settings
 } from "lucide-react";
 
-export default function AdminCertificates() {
+export default function AdminCertificatesNew() {
   const navigate = useNavigate();
   const hasToken = useMemo(() => !!getAdminToken(), []);
   const fileInputRef = useRef(null);
@@ -18,9 +18,10 @@ export default function AdminCertificates() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [savingSettings, setSavingSettings] = useState(false);
 
-  // ✅ Fixed to "diploma"
-  const certificateType = "diploma";
+  // ✅ Fixed to "certificate" only
+  const certificateType = "certificate";
 
   const [create, setCreate] = useState({
     visitorId: "",
@@ -75,21 +76,21 @@ export default function AdminCertificates() {
 
   const [showEnrollmentLookup, setShowEnrollmentLookup] = useState(false);
 
-  // ✅ Save Diploma type to settings
-  const saveTypeToSettings = async () => {
+  // ✅ Save type to settings when changed
+  const saveTypeToSettings = async (type) => {
+    setSavingSettings(true);
     try {
       await adminApi.put("/api/admin/settings/certificate_name", { 
-        value: "Diploma" 
+        value: type === 'diploma' ? 'Diploma' : 'Certificate' 
       });
-      console.log(`✅ Settings updated to: Diploma`);
+      console.log(`✅ Settings updated to: ${type}`);
     } catch (error) {
       console.error("Failed to save settings:", error);
+      setErr("Failed to save type to settings. Please try again.");
+    } finally {
+      setSavingSettings(false);
     }
   };
-
-  useEffect(() => {
-    saveTypeToSettings();
-  }, []);
 
   const createCertificate = async (e) => {
     e.preventDefault();
@@ -109,7 +110,7 @@ export default function AdminCertificates() {
         enrollmentNo: create.enrollmentNo,
         branchCode: create.branchCode,
         place: create.place,
-        certificateType: "diploma",
+        certificateType: "certificate",
       };
 
       const formData = new FormData();
@@ -126,7 +127,7 @@ export default function AdminCertificates() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setNotice(`✅ Diploma created successfully!`);
+      setNotice(`✅ Certificate created successfully!`);
       
       setCreate({
         visitorId: "",
@@ -150,8 +151,8 @@ export default function AdminCertificates() {
       if (fileInputRef.current) fileInputRef.current.value = "";
       await fetchList(filters);
     } catch (err) {
-      console.error("Create diploma error:", err);
-      setErr(err?.response?.data?.message || "Failed to create diploma");
+      console.error("Create certificate error:", err);
+      setErr(err?.response?.data?.message || "Failed to create certificate");
     } finally {
       setCreating(false);
     }
@@ -193,7 +194,7 @@ export default function AdminCertificates() {
       fullName: enrollment.fullName || c.fullName,
       courseSlug: enrollment.courseSlug || c.courseSlug,
     }));
-    setNotice(`Loaded enrollment for ${enrollment.fullName}. Complete the form and create diploma.`);
+    setNotice(`Loaded enrollment for ${enrollment.fullName}. Complete the form and create certificate.`);
     setShowEnrollmentLookup(false);
   };
 
@@ -228,7 +229,7 @@ export default function AdminCertificates() {
       setItems(Array.isArray(res.data?.items) ? res.data.items : []);
       setTotal(res.data?.total || 0);
     } catch (e) {
-      setErr(e?.response?.data?.message || "Failed to load diplomas");
+      setErr(e?.response?.data?.message || "Failed to load certificates");
     } finally {
       setLoading(false);
     }
@@ -239,6 +240,8 @@ export default function AdminCertificates() {
       navigate("/admin/login", { replace: true });
       return;
     }
+    // ✅ Save certificate type to settings
+    saveTypeToSettings("certificate");
     fetchList(filters);
   }, [hasToken]);
 
@@ -256,17 +259,17 @@ export default function AdminCertificates() {
   };
 
   const onDelete = async (cert) => {
-    const ok = window.confirm(`Delete Diploma #${cert.certificateNumber} for "${cert.fullName}"? This can't be undone.`);
+    const ok = window.confirm(`Delete Certificate #${cert.certificateNumber} for "${cert.fullName}"? This can't be undone.`);
     if (!ok) return;
 
     setDeletingId(cert.id);
     setErr(null);
     try {
       await adminApi.delete(`/api/admin/certificates/${cert.id}`);
-      setNotice(`Diploma deleted successfully.`);
+      setNotice(`Certificate deleted successfully.`);
       fetchList(filters);
     } catch (e) {
-      setErr(e?.response?.data?.message || "Failed to delete diploma");
+      setErr(e?.response?.data?.message || "Failed to delete certificate");
     } finally {
       setDeletingId(null);
     }
@@ -276,8 +279,8 @@ export default function AdminCertificates() {
     ? 1 
     : Math.max(1, Math.ceil(total / (Number(filters.limit) || 25)));
 
-  const typeLabel = "Diploma";
-  const typeLabelLower = "diploma";
+  const typeLabel = "Certificate";
+  const typeLabelLower = "certificate";
 
   return (
     <AdminLayout
@@ -289,33 +292,7 @@ export default function AdminCertificates() {
         </span>
       }
     >
-      {/* ✅ Fixed Type Display - Only Diploma */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Type:</span>
-              <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-bold">
-                Diploma
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400">
-                ⚡ Changes are automatically saved to Settings
-              </span>
-              <Link
-                to="/admin/settings"
-                className="text-gray-400 hover:text-[#7B1C1C] transition p-1.5 rounded-lg hover:bg-gray-100"
-                title="Change in Settings"
-              >
-                <Settings className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Create Diploma Section */}
+      {/* Create Certificate Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
@@ -323,8 +300,8 @@ export default function AdminCertificates() {
               <Plus className="w-5 h-5 text-[#7B1C1C]" />
             </div>
             <div>
-              <h3 className="font-sora font-bold text-gray-800 text-sm">Create Diploma</h3>
-              <p className="text-xs text-gray-500">Generate diploma for student. Same student + course will update existing diploma.</p>
+              <h3 className="font-sora font-bold text-gray-800 text-sm">Create Certificate</h3>
+              <p className="text-xs text-gray-500">Generate certificate for student. Same student + course will update existing certificate.</p>
             </div>
           </div>
           <button
@@ -352,7 +329,7 @@ export default function AdminCertificates() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {/* All form fields - same as before */}
+            {/* Full Name */}
             <div>
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
                 <User className="w-3.5 h-3.5" />
@@ -566,7 +543,7 @@ export default function AdminCertificates() {
               ) : (
                 <>
                   <Plus className="w-4 h-4" />
-                  Create Diploma
+                  Create Certificate
                 </>
               )}
             </button>
@@ -835,8 +812,8 @@ export default function AdminCertificates() {
               <Award className="w-5 h-5 text-[#7B1C1C]" />
             </div>
             <div>
-              <h3 className="font-sora font-bold text-gray-800 text-sm">Issued Diplomas</h3>
-              <p className="text-xs text-gray-500">{total} diplomas found</p>
+              <h3 className="font-sora font-bold text-gray-800 text-sm">Issued Certificates</h3>
+              <p className="text-xs text-gray-500">{total} certificates found</p>
             </div>
           </div>
           <button
@@ -852,7 +829,7 @@ export default function AdminCertificates() {
             <thead className="bg-gray-50">
               <tr className="text-left">
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Photo</th>
-                <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Diploma #</th>
+                <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Certificate #</th>
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Name</th>
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Course</th>
                 <th className="p-4 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Issued</th>
@@ -865,7 +842,7 @@ export default function AdminCertificates() {
                   <td colSpan={6} className="p-8 text-center">
                     <div className="flex items-center justify-center gap-3">
                       <Loader2 className="w-5 h-5 animate-spin text-[#7B1C1C]" />
-                      <span className="text-gray-500">Loading diplomas...</span>
+                      <span className="text-gray-500">Loading certificates...</span>
                     </div>
                   </td>
                 </tr>
@@ -874,8 +851,8 @@ export default function AdminCertificates() {
                   <td colSpan={6} className="p-8 text-center">
                     <div className="text-gray-500">
                       <Award className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-                      <p>No diplomas found</p>
-                      <p className="text-xs text-gray-400 mt-1">Create your first diploma to get started</p>
+                      <p>No certificates found</p>
+                      <p className="text-xs text-gray-400 mt-1">Create your first certificate to get started</p>
                     </div>
                   </td>
                 </tr>
@@ -946,7 +923,7 @@ export default function AdminCertificates() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-100">
             <span className="text-sm text-gray-500">
               Showing <span className="font-semibold text-gray-700">{items.length}</span> of{' '}
-              <span className="font-semibold text-gray-700">{total}</span> diplomas
+              <span className="font-semibold text-gray-700">{total}</span> certificates
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -976,7 +953,7 @@ export default function AdminCertificates() {
         {!loading && items.length > 0 && filters.limit === "all" && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-100">
             <span className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-700">All</span> {total} diplomas
+              Showing <span className="font-semibold text-gray-700">All</span> {total} certificates
             </span>
           </div>
         )}

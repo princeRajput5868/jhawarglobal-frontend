@@ -55,10 +55,15 @@ export default function AdminSettings() {
     setSuccess(null);
 
     try {
-      for (const [key, value] of Object.entries(settings)) {
-        await adminApi.put(`/api/admin/settings/${key}`, { value });
-      }
-      setSuccess("Settings updated successfully!");
+      // ✅ Save only certificate settings
+      const certificateData = {
+        certificate_name: settings.certificate_name,
+        organization_name: settings.organization_name,
+        signatory_name: settings.signatory_name,
+      };
+      
+      await adminApi.put("/api/admin/settings", certificateData);
+      setSuccess("✅ Settings updated successfully!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to save settings");

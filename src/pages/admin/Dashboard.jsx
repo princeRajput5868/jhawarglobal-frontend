@@ -6,7 +6,8 @@ import {
   Award, BookOpen, Star, Users, TrendingUp, Calendar, 
   ChevronRight, FileText, Settings, BarChart3, 
   Clock, CheckCircle, XCircle, ExternalLink, PlusCircle,
-  MessageSquare, UserCheck
+  MessageSquare, UserCheck, Landmark, QrCode, Smartphone,
+  Save, Loader2, AlertCircle
 } from "lucide-react";
 
 function StatCard({ label, value, icon, accent, subtitle }) {
@@ -95,6 +96,23 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
+  // ✅ Donation Settings State
+  const [donationSettings, setDonationSettings] = useState({
+    upi_id: "jawaharglobal@upi",
+    qr_code_url: "/assets/qr-code.png",
+    bank_account_name: "Sanatani Sewa Foundation",
+    bank_name: "AU Small Finance Bank",
+    bank_account_type: "Current Account",
+    bank_account_number: "2502248577019662",
+    bank_ifsc_code: "AUBL0002485",
+    bank_branch: "Sector 63, Noida",
+    donation_message: "This donation is eligible for 80G tax exemption.",
+  });
+  const [savingDonation, setSavingDonation] = useState(false);
+  const [donationSuccess, setDonationSuccess] = useState(null);
+  const [donationError, setDonationError] = useState(null);
+  const [uploadingQr, setUploadingQr] = useState(false);
+
   useEffect(() => {
     if (!hasToken) {
       navigate("/admin/login", { replace: true });
@@ -105,19 +123,101 @@ export default function AdminDashboard() {
       setLoading(true);
       setErr(null);
       try {
-        const [coursesRes, statsRes] = await Promise.all([
+        const [coursesRes, statsRes, settingsRes] = await Promise.all([
           adminApi.get("/api/admin/courses"),
           adminApi.get("/api/admin/certificates/stats"),
+          adminApi.get("/api/admin/settings"),
         ]);
         setCourses(coursesRes.data || []);
         setStats(statsRes.data || null);
+        
+        // ✅ Load Donation Settings
+        const data = settingsRes.data || {};
+        setDonationSettings({
+          upi_id: data.upi_id || "jawaharglobal@upi",
+          qr_code_url: data.qr_code_url || "/assets/qr-code.png",
+          bank_account_name: data.bank_account_name || "Sanatani Sewa Foundation",
+          bank_name: data.bank_name || "AU Small Finance Bank",
+          bank_account_type: data.bank_account_type || "Current Account",
+          bank_account_number: data.bank_account_number || "2502248577019662",
+          bank_ifsc_code: data.bank_ifsc_code || "AUBL0002485",
+          bank_branch: data.bank_branch || "Sector 63, Noida",
+          donation_message: data.donation_message || "This donation is eligible for 80G tax exemption.",
+        });
       } catch (e) {
+        console.error("Error loading dashboard:", e);
         setErr(e?.response?.data?.message || "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
     })();
   }, [hasToken, navigate]);
+
+  // ✅ Handle QR Code Upload
+  const handleQrUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingQr(true);
+    setDonationError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("qrImage", file);
+
+      const res = await adminApi.post("/api/admin/settings/upload-qr", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setDonationSettings((prev) => ({
+        ...prev,
+        qr_code_url: res.data.qr_code_url,
+      }));
+
+      setDonationSuccess("✅ QR code uploaded! Click 'Save Donation Settings' to confirm.");
+      setTimeout(() => setDonationSuccess(null), 3000);
+    } catch (err) {
+      setDonationError(err?.response?.data?.message || "Failed to upload QR code");
+    } finally {
+      setUploadingQr(false);
+      e.target.value = "";
+    }
+  };
+
+  // ✅ Handle Donation Save
+  const handleDonationSave = async (e) => {
+    e.preventDefault();
+    setSavingDonation(true);
+    setDonationError(null);
+    setDonationSuccess(null);
+
+    try {
+      const donationData = {
+        upi_id: donationSettings.upi_id,
+        qr_code_url: donationSettings.qr_code_url,
+        bank_account_name: donationSettings.bank_account_name,
+        bank_name: donationSettings.bank_name,
+        bank_account_type: donationSettings.bank_account_type,
+        bank_account_number: donationSettings.bank_account_number,
+        bank_ifsc_code: donationSettings.bank_ifsc_code,
+        bank_branch: donationSettings.bank_branch,
+        donation_message: donationSettings.donation_message,
+      };
+      
+      console.log("📤 Saving donation settings:", donationData);
+      
+      const response = await adminApi.put("/api/admin/settings", donationData);
+      console.log("✅ Response:", response.data);
+      
+      setDonationSuccess("✅ Donation settings updated successfully!");
+      setTimeout(() => setDonationSuccess(null), 3000);
+    } catch (e) {
+      console.error("❌ Error saving donation settings:", e);
+      setDonationError(e?.response?.data?.message || "Failed to save donation settings");
+    } finally {
+      setSavingDonation(false);
+    }
+  };
 
   const statsCards = [
     {
@@ -143,7 +243,6 @@ export default function AdminDashboard() {
     },
   ];
 
-  // ✅ Quick Actions - Placements & Testimonials ADDED
   const quickActions = [
     {
       title: "Manage Certificates",
@@ -188,12 +287,12 @@ export default function AdminDashboard() {
       color: "#F59E0B",
     },
     {
-  title: "Settings",
-  description: "Manage certificate name and organization settings",
-  icon: <Settings className="w-6 h-6" />,
-  link: "/admin/settings",
-  color: "#8B5CF6",
-},
+      title: "Settings",
+      description: "Manage certificate name and organization settings",
+      icon: <Settings className="w-6 h-6" />,
+      link: "/admin/settings",
+      color: "#8B5CF6",
+    },
   ];
 
   return (
@@ -243,6 +342,184 @@ export default function AdminDashboard() {
             />
           ))}
         </div>
+      </div>
+
+      {/* ✅ Donation Settings Section */}
+      <div className="mb-8 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Landmark className="w-5 h-5 text-[#7B1C1C]" />
+            <h2 className="font-sora font-bold text-gray-800 text-lg">Donation Settings</h2>
+            <span className="text-xs text-gray-400 ml-2">Manage UPI, QR Code & Bank Details</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleDonationSave} className="p-5">
+          {donationError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-red-700 text-sm">{donationError}</p>
+            </div>
+          )}
+
+          {donationSuccess && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3 animate-fadeIn">
+              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+              <p className="text-green-700 text-sm">{donationSuccess}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* UPI ID */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <Smartphone className="w-3.5 h-3.5" />
+                UPI ID
+              </label>
+              <input
+                value={donationSettings.upi_id}
+                onChange={(e) => setDonationSettings({ ...donationSettings, upi_id: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="jawaharglobal@upi"
+              />
+            </div>
+
+            {/* QR Code Upload */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <QrCode className="w-3.5 h-3.5" />
+                QR Code Image
+              </label>
+              <div className="flex items-center gap-4">
+                {donationSettings.qr_code_url && (
+                  <img
+                    src={
+                      donationSettings.qr_code_url.startsWith("http")
+                        ? donationSettings.qr_code_url
+                        : donationSettings.qr_code_url.startsWith("/uploads")
+                        ? `${adminApi.defaults.baseURL}${donationSettings.qr_code_url}`
+                        : donationSettings.qr_code_url
+                    }
+                    alt="QR Code"
+                    className="w-16 h-16 object-contain border border-gray-200 rounded-lg bg-white p-1"
+                    onError={(e) => { e.target.style.display = "none"; }}
+                  />
+                )}
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={handleQrUpload}
+                    disabled={uploadingQr}
+                    className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#7B1C1C] file:text-white file:text-xs file:font-bold hover:file:bg-[#5f1515] file:cursor-pointer disabled:opacity-60"
+                  />
+                  {uploadingQr && (
+                    <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Uploading...
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Account Name */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Account Name</label>
+              <input
+                value={donationSettings.bank_account_name}
+                onChange={(e) => setDonationSettings({ ...donationSettings, bank_account_name: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="Account Name"
+              />
+            </div>
+
+            {/* Bank Name */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Bank Name</label>
+              <input
+                value={donationSettings.bank_name}
+                onChange={(e) => setDonationSettings({ ...donationSettings, bank_name: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="Bank Name"
+              />
+            </div>
+
+            {/* Account Type */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Account Type</label>
+              <input
+                value={donationSettings.bank_account_type}
+                onChange={(e) => setDonationSettings({ ...donationSettings, bank_account_type: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="Current Account"
+              />
+            </div>
+
+            {/* Account Number */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Account Number</label>
+              <input
+                value={donationSettings.bank_account_number}
+                onChange={(e) => setDonationSettings({ ...donationSettings, bank_account_number: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="Account Number"
+              />
+            </div>
+
+            {/* IFSC Code */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">IFSC Code</label>
+              <input
+                value={donationSettings.bank_ifsc_code}
+                onChange={(e) => setDonationSettings({ ...donationSettings, bank_ifsc_code: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="IFSC Code"
+              />
+            </div>
+
+            {/* Branch */}
+            <div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Branch</label>
+              <input
+                value={donationSettings.bank_branch}
+                onChange={(e) => setDonationSettings({ ...donationSettings, bank_branch: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="Branch Name"
+              />
+            </div>
+
+            {/* Donation Message */}
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Donation Message</label>
+              <input
+                value={donationSettings.donation_message}
+                onChange={(e) => setDonationSettings({ ...donationSettings, donation_message: e.target.value })}
+                className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:border-[#7B1C1C] focus:ring-2 focus:ring-[#7B1C1C]/20 transition outline-none"
+                placeholder="This donation is eligible for 80G tax exemption."
+              />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <button
+              type="submit"
+              disabled={savingDonation}
+              className="bg-[#7B1C1C] hover:bg-[#5f1515] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all duration-300 disabled:opacity-60 flex items-center gap-2 shadow-lg hover:shadow-[#7B1C1C]/30"
+            >
+              {savingDonation ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Donation Settings
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Recent Activity */}
@@ -406,6 +683,16 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+      `}</style>
     </AdminLayout>
   );
 }

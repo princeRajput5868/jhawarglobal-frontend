@@ -1,28 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Heart, QrCode, Copy, CheckCircle,
   Shield, Award, Users, Landmark, Smartphone
 } from "lucide-react";
 
-const Donate = () => {
+const API = import.meta.env.VITE_API_URL || "https://jhawarglobal-backend.onrender.com";
+
+export default function Donate() {
   const [copiedField, setCopiedField] = useState("");
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const upiId = "jawaharglobal@upi";
-
-  const bankDetails = {
-    accountName: "Sanatani Sewa Foundation",
-    bankName: "AU Small Finance Bank",
-    accountType: "Current Account",
-    accountNumber: "2502248577019662",
-    ifscCode: "AUBL0002485",
-    branch: "Sector 63, Noida",
-  };
+  // ✅ Fetch settings from API
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch(`${API}/api/admin/settings`);
+        const data = await response.json();
+        setSettings(data);
+      } catch (error) {
+        console.error("Failed to fetch settings:", error);
+        // ✅ Fallback settings
+        setSettings({
+          upi_id: "jawaharglobal@upi",
+          qr_code_url: "/assets/qr-code.png",
+          bank_account_name: "Sanatani Sewa Foundation",
+          bank_name: "AU Small Finance Bank",
+          bank_account_type: "Current Account",
+          bank_account_number: "2502248577019662",
+          bank_ifsc_code: "AUBL0002485",
+          bank_branch: "Sector 63, Noida",
+          donation_message: "This donation is eligible for 80G tax exemption.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleCopy = (value, field) => {
     navigator.clipboard.writeText(value);
     setCopiedField(field);
     setTimeout(() => setCopiedField(""), 2000);
+  };
+
+  // ✅ Use settings data with fallback
+  const upiId = settings?.upi_id || "jawaharglobal@upi";
+  const qrCodeUrl = settings?.qr_code_url || "/assets/qr-code.png";
+  const donationMessage = settings?.donation_message || "This donation is eligible for 80G tax exemption.";
+
+  const bankDetails = {
+    accountName: settings?.bank_account_name || "Sanatani Sewa Foundation",
+    bankName: settings?.bank_name || "AU Small Finance Bank",
+    accountType: settings?.bank_account_type || "Current Account",
+    accountNumber: settings?.bank_account_number || "2502248577019662",
+    ifscCode: settings?.bank_ifsc_code || "AUBL0002485",
+    branch: settings?.bank_branch || "Sector 63, Noida",
   };
 
   const stats = [
@@ -31,6 +66,17 @@ const Donate = () => {
     { number: "12", label: "Training Centers" },
     { number: "96%", label: "Success Rate" },
   ];
+
+  if (loading) {
+    return (
+      <main className="bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#F2A93B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">Loading donation details...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-gray-50 min-h-screen font-inter">
@@ -102,7 +148,7 @@ const Donate = () => {
 
               <div className="w-full max-w-[280px] mx-auto bg-white border-2 border-gray-200 rounded-xl p-4 flex items-center justify-center">
                 <img
-                  src="/assets/qr-code.png"
+                  src={qrCodeUrl}
                   alt="UPI QR Code"
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -192,7 +238,7 @@ const Donate = () => {
 
               <div className="mt-6 bg-[#F2A93B]/10 border border-[#F2A93B]/20 rounded-xl p-3 text-center">
                 <p className="text-xs text-[#0B2545] font-medium">
-                  🔒 This donation is eligible for 80G tax exemption.
+                  🔒 {donationMessage}
                 </p>
               </div>
             </div>
@@ -220,6 +266,4 @@ const Donate = () => {
       </section>
     </main>
   );
-};
-
-export default Donate;
+}

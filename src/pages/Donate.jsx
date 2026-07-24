@@ -48,7 +48,10 @@ export default function Donate() {
 
   // ✅ Use settings data with fallback
   const upiId = settings?.upi_id || "jawaharglobal@upi";
-  const qrCodeUrl = settings?.qr_code_url || "/assets/qr-code.png";
+  const rawQrUrl = settings?.qr_code_url || "/assets/qr-code.png";
+const qrCodeUrl = rawQrUrl.startsWith("/uploads")
+  ? `${API}${rawQrUrl}`
+  : rawQrUrl;
   const donationMessage = settings?.donation_message || "This donation is eligible for 80G tax exemption.";
 
   const bankDetails = {
